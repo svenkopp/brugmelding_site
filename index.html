@@ -2,556 +2,610 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Brugmelding</title>
 
+  <!-- Zoom op de website uitschakelen op mobiel -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
   <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
-  />
-  <!-- MarkerCluster CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
-  />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
-  />
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      transition: background 0.3s, color 0.3s;
+    :root {
+      --accent: #0066ff;
+      --green: #2ecc71;
+      --red: #e74c3c;
     }
 
-    body.light {
-      background: #f7f7f7;
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+      background: #f6f6f6;
       color: #222;
+      transition: background .3s, color .3s;
     }
+
     body.dark {
-      background: #1a1a1a;
+      background: #111;
       color: #eee;
     }
 
     #map {
-      height: 100vh;
       width: 100vw;
+      height: 100vh;
     }
 
-    /* Panels (UI blokjes) */
-    .panel {
-      position: absolute;
-      z-index: 9999;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 10px 12px;
-      border-radius: 6px;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      font-size: 14px;
-      transition: background 0.3s, color 0.3s;
-    }
-	
-	/* Watermark – verplaatst zodat hij nooit achter de legenda valt */
-	.watermark {
-	  position: absolute;
-	  bottom: 20px;
-	  right: 180px; /* genoeg ruimte voor de legenda */
-	  z-index: 9000;
-	  font-size: 12px;
-	  opacity: 0.6;
-	  background: rgba(255, 255, 255, 0.4);
-	  padding: 4px 8px;
-	  border-radius: 4px;
-	  backdrop-filter: blur(2px);
-	  pointer-events: none;
-	}
-
-	body.dark .watermark {
-	  background: rgba(40, 40, 40, 0.5);
-	  color: #ccc;
-	}
-
-
-
-    body.dark .panel {
-      background: rgba(40, 40, 40, 0.85);
-      color: #eee;
+    /* Zorg dat zoomknoppen onder de top-bar vallen */
+    .leaflet-top.leaflet-left {
+      margin-top: 60px !important;
     }
 
-    /* Posities: weg bij zoom-knoppen (links-boven) */
-    .legend {
-      bottom: 15px;
-      right: 15px;
+    /* TOP BAR */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      z-index: 9000;
+    }
+    body.dark .top-bar {
+      background: rgba(20,20,20,0.9);
+      border-color: rgba(255,255,255,0.2);
     }
 
-    .controls {
-      bottom: 15px;
-      left: 15px;
-      max-width: 260px;
+    .top-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .top-subtitle {
+      font-size: 11px;
+      opacity: 0.7;
     }
 
     .theme-toggle {
-      top: 15px;
-      right: 15px;
-    }
-
-    .controls h3 {
-      margin: 0 0 6px 0;
-      font-size: 14px;
-    }
-
-    .controls .row {
-      margin-bottom: 6px;
-    }
-
-    .controls button {
-      padding: 5px 8px;
-      margin: 2px 2px 2px 0;
-      border: 1px solid #999;
-      border-radius: 4px;
-      background: #eee;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 0;
+      background: var(--accent);
+      color: #fff;
       cursor: pointer;
-      font-size: 13px;
-    }
-
-    body.dark .controls button {
-      background: #444;
-      border-color: #666;
-      color: white;
-    }
-
-    .controls select,
-    .controls input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 4px 6px;
-      border-radius: 4px;
-      border: 1px solid #aaa;
-      font-size: 13px;
-      margin-top: 2px;
-    }
-
-    .controls .search-row {
       display: flex;
-      gap: 4px;
-      margin-top: 4px;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
     }
-
-    .controls .search-row input {
-      flex: 1;
-    }
-
-    .controls .search-row button {
-      white-space: nowrap;
-    }
-
-    .theme-toggle button {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      background: #0066ff;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    body.dark .theme-toggle button {
+    body.dark .theme-toggle {
       background: #333;
-      color: #ddd;
     }
 
-    .legend img {
-      width: 20px;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-
-    /* Loading overlay */
-    #loadingOverlay {
+    /* PANELS */
+    .map-panel {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 8000;
+      font-size: 13px;
+    }
+    body.dark .map-panel {
+      background: rgba(20,20,20,0.92);
+      color: #eee;
+    }
+
+    .map-panel.controls {
+      left: 10px;
+      bottom: 100px;
+      max-width: 240px;
+    }
+
+    .map-panel.legend-panel {
+      right: 10px;
+      bottom: 100px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 3px;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .chip {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.25);
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    body.dark .chip {
+      background: #333;
+      border-color: #555;
+    }
+
+    .sheet-input,
+    .sheet-select {
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.25);
+      margin-top: 4px;
+      background: #fff;
+      font-size: 13px;
+    }
+    body.dark .sheet-input,
+    body.dark .sheet-select {
+      background: #222;
+      border-color: #555;
+      color: #eee;
+    }
+
+    /* LEGEND */
+    .legend-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 4px 0;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .legend-dot.closed {
+      background: var(--green);
+    }
+    .legend-dot.open {
+      background: var(--red);
+    }
+
+    /* DETAILSHEET */
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(14px);
+      border-radius: 16px 16px 0 0;
+      transform: translateY(calc(100% - 60px));
+      max-height: 65vh;
+      padding-bottom: 16px;
+      transition: transform .35s ease;
+      z-index: 8500;
+    }
+    body.dark .sheet {
+      background: rgba(20,20,20,0.97);
+    }
+    .sheet.expanded {
+      transform: translateY(0);
+    }
+
+    .sheet-header {
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    .sheet-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.25);
+      margin: 0 auto 6px auto;
+    }
+    body.dark .sheet-handle {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .sheet-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .sheet-subtitle {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .sheet-body {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      font-size: 13px;
+      overflow-y: auto;
+      height: 100%;
+    }
+    body.dark .sheet-body {
+      border-color: #444;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+	
+    .badge-status.closed {
+      background: rgba(46,204,113,0.18);
+      color: var(--green);
+    }
+    .badge-status.open {
+      background: rgba(231,76,60,0.18);
+      color: var(--red);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* LOCATIE KNOP – netjes rechtsboven onder de topbar */
+    .loc-btn {
+      position: fixed;
+      right: 12px;
+      top: 70px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
-      color: white;
+      cursor: pointer;
+      z-index: 9000;
+      user-select: none;
       font-size: 18px;
-      backdrop-filter: blur(3px);
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.2s;
     }
-    #loadingOverlay.visible {
-      visibility: visible;
-      opacity: 1;
+    body.dark .loc-btn {
+      background: #333;
+      color: #fff;
     }
 
-    #loadingOverlay .box {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 16px 22px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    /* WATERMARK */
+    .watermark {
+      position: fixed;
+      bottom: 6px;
+      left: 6px;
+      font-size: 10px;
+      opacity: 0.25;
+      z-index: 4000;
+      pointer-events: none;
     }
-
-    /* Marker animaties */
-    @keyframes markerFadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.7);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes markerBlink {
-      0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 0 rgba(255, 255, 0, 0.0));
-      }
-      50% {
-        transform: scale(1.2);
-        filter: drop-shadow(0 0 8px rgba(255, 255, 0, 0.8));
-      }
-    }
-
-    .leaflet-marker-icon.marker-fade-in {
-      animation: markerFadeIn 0.4s ease-out;
-    }
-
-    .leaflet-marker-icon.marker-blink {
-      animation: markerBlink 1s ease-in-out 3;
+    body.dark .watermark {
+      color: #fff;
     }
   </style>
 </head>
-<body class="light">
 
-  <!-- Loading overlay -->
-  <div id="loadingOverlay">
-    <div class="box">Bruggen laden…</div>
-  </div>
+<body>
 
-  <!-- Dark mode switch -->
-  <div class="panel theme-toggle">
-    <button onclick="toggleTheme()">Dark mode</button>
-  </div>
-
-  <!-- Filters + provincie + zoeken (linksonder) -->
-  <div class="panel controls">
-    <h3>Brugmelding</h3>
-
-    <div class="row">
-      <strong>Status:</strong><br />
-      <button onclick="setStatusFilter('all')">Alle</button>
-      <button onclick="setStatusFilter('open')">Open</button>
-      <button onclick="setStatusFilter('closed')">Dicht</button>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-title">Brugmelding</div>
+      <div class="top-subtitle">NDW – brugopeningen NL</div>
     </div>
 
-    <div class="row">
-      <strong>Provincie:</strong><br />
-      <select id="provinceFilter" onchange="onProvinceChange()">
-        <option value="all">Alle provincies</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <strong>Zoek brug:</strong>
-      <div class="search-row">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Naam (bv. Cruquiusbrug)…"
-        />
-        <button type="button" onclick="searchBrug()">Zoek</button>
-      </div>
-    </div>
+    <button class="theme-toggle" id="themeToggle">
+      <span class="icon">🌙</span>
+      <span class="label">Dark mode</span>
+    </button>
   </div>
 
-  <!-- Legenda (rechtsonder, uit buurt van zoom) -->
-  <div class="panel legend">
-    <div><img src="brug_open.png" alt="Open" />Open</div>
-    <div><img src="brug_dicht.png" alt="Dicht" />Dicht</div>
-  </div>
-
+  <!-- MAP -->
   <div id="map"></div>
 
-  <!-- Leaflet JS -->
+  <!-- LOCATIE KNOP -->
+  <div class="loc-btn" id="locBtn" title="Mijn locatie">📍</div>
+
+  <!-- WATERMARK -->
+  <div class="watermark">Data: NDW</div>
+
+  <!-- FILTER PANEL -->
+  <div class="map-panel controls">
+    <div class="section-label">Status</div>
+    <div class="chip-group">
+      <div class="chip active" id="fAll">Alle</div>
+      <div class="chip" id="fOpen">Open</div>
+      <div class="chip" id="fClosed">Dicht</div>
+    </div>
+
+    <div hidden class="section-label">Provincie</div>
+    <select hidden id="provinceFilter" class="sheet-select">
+      <option value="all">Alle provincies</option>
+    </select>
+
+    <div class="section-label">Zoeken</div>
+    <input id="searchInput" class="sheet-input" placeholder="Bijv. Cruquiusbrug…" />
+  </div>
+
+  <!-- LEGENDA -->
+  <div class="map-panel legend-panel">
+    <div class="legend-line"><span class="legend-dot open"></span> Open</div>
+    <div class="legend-line"><span class="legend-dot closed"></span> Dicht</div>
+  </div>
+
+  <!-- DETAILSHEET -->
+  <div class="sheet" id="sheet">
+    <div class="sheet-header" id="sheetHeader">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title" id="sheetTitle">Geen brug geselecteerd</div>
+      <div class="sheet-subtitle" id="sheetSubtitle">Tik op een brug…</div>
+    </div>
+
+    <div class="sheet-body">
+      <dl id="bridgeDetails">
+        <div>Nog niets geselecteerd.</div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- MarkerCluster JS -->
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
-    /* --------------------------------------------------------
-       TILES & THEMA
-    --------------------------------------------------------- */
-    const lightTiles = L.tileLayer(
-      "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      { maxZoom: 18 }
-    );
-    const darkTiles = L.tileLayer(
-      "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18 }
-    );
-
+    /* MAP INIT */
     const map = L.map("map").setView([52.2, 5.3], 7);
 
-    let theme = localStorage.getItem("brugmelding_theme") || "light";
-    document.body.className = theme;
+    const lightTiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19});
+    const darkTiles  = L.tileLayer("https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19});
 
-    if (theme === "dark") {
-      darkTiles.addTo(map);
-    } else {
-      lightTiles.addTo(map);
+    let theme = localStorage.getItem("theme") || "light";
+    document.body.classList.toggle("dark", theme === "dark");
+    (theme === "dark" ? darkTiles : lightTiles).addTo(map);
+
+    const cluster = L.markerClusterGroup();
+    map.addLayer(cluster);
+
+    const iconOpen = L.icon({ iconUrl:"brug_open.png", iconSize:[28,28] });
+    const iconClosed = L.icon({ iconUrl:"brug_dicht.png", iconSize:[28,28] });
+
+    /* THEME TOGGLE */
+    const themeToggle = document.getElementById("themeToggle");
+    function updateThemeBtn() {
+      themeToggle.querySelector(".label").textContent =
+        theme === "light" ? "Dark mode" : "Light mode";
+      themeToggle.querySelector(".icon").textContent =
+        theme === "light" ? "🌙" : "☀️";
     }
+    updateThemeBtn();
 
-    function toggleTheme() {
-      if (theme === "light") {
-        theme = "dark";
-        document.body.className = "dark";
-        map.removeLayer(lightTiles);
-        darkTiles.addTo(map);
-      } else {
-        theme = "light";
-        document.body.className = "light";
-        map.removeLayer(darkTiles);
-        lightTiles.addTo(map);
-      }
-      localStorage.setItem("brugmelding_theme", theme);
-    }
+    themeToggle.onclick = () => {
+      theme = theme === "light" ? "dark" : "light";
+      document.body.classList.toggle("dark", theme === "dark");
+      map.removeLayer(lightTiles); map.removeLayer(darkTiles);
+      (theme === "dark" ? darkTiles : lightTiles).addTo(map);
+      localStorage.setItem("theme", theme);
+      updateThemeBtn();
+    };
 
-    /* --------------------------------------------------------
-       MARKERS, CLUSTER, DATA
-    --------------------------------------------------------- */
-    const iconOpen = L.icon({
-      iconUrl: "brug_open.png",
-      iconSize: [28, 28]
-    });
-    const iconClosed = L.icon({
-      iconUrl: "brug_dicht.png",
-      iconSize: [28, 28]
-    });
+    /* DATA */
+    let bruggen = [];
+    let markers = [];
+    let selectedId = null;
 
-    const clusterGroup = L.markerClusterGroup();
-    map.addLayer(clusterGroup);
+    let statusFilter = "all";
+    let provinceFilter = "all";
 
-    let markers = []; // { marker, id, naam }
-    let brugDataCache = [];
-    let prevOpenState = {}; // id -> boolean
-
-    let currentStatusFilter = "all"; // all/open/closed
-    let currentProvinceFilter = "all";
-
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const provinceSelect = document.getElementById("provinceFilter");
-    const searchInput = document.getElementById("searchInput");
-
-    function showLoading() {
-      loadingOverlay.classList.add("visible");
-    }
-    function hideLoading() {
-      loadingOverlay.classList.remove("visible");
-    }
-
-    function loadBruggen() {
-      showLoading();
+    function load() {
       fetch("/get/bruggen_open.json")
-        .then((r) => r.json())
-        .then((data) => {
-          brugDataCache = Array.isArray(data) ? data : [];
-          updateProvinceOptions(brugDataCache);
+        .then(r => r.json())
+        .then(data => {
+          bruggen = data;
+          updateProvinceOptions();
           renderMarkers();
-        })
-        .catch((e) => {
-          console.error("Fout bij laden JSON:", e);
-        })
-        .finally(() => {
-          hideLoading();
+          updateSheet();
         });
-    }
-
-    function clearMarkers() {
-      clusterGroup.clearLayers();
-      markers = [];
     }
 
     function renderMarkers() {
-      clearMarkers();
+      cluster.clearLayers();
+      markers = [];
 
-      // markers tekenen + verandering detecteren
-      brugDataCache.forEach((item) => {
-        const d = item.Data || item.data || {};
-        const id = item.Id || item.id;
+      bruggen.forEach(b => {
+        const d = b.Data;
+        if (!d) return;
 
-        if (d.latitude == null || d.longitude == null) return;
+        // Status filter
+        if (statusFilter === "open" && !d.open) return;
+        if (statusFilter === "closed" && d.open) return;
 
-        // statusfilter
-        if (currentStatusFilter === "open" && !d.open) return;
-        if (currentStatusFilter === "closed" && d.open) return;
+        // Provincie filter
+        const prov = (d.provincie || "").toLowerCase();
+        if (provinceFilter !== "all" && prov !== provinceFilter) return;
 
-        // provinciefilter (als veld bestaat)
-        const rawProv =
-          d.provincie || d.Provincie || d.province || d.ProvincieNaam || "";
-        if (
-          currentProvinceFilter !== "all" &&
-          rawProv.toString().toLowerCase() !==
-            currentProvinceFilter.toLowerCase()
-        ) {
-          return;
-        }
-
-        const previousOpen = prevOpenState[id];
-        const changed =
-          typeof previousOpen !== "undefined" && previousOpen !== !!d.open;
-
-        addMarkerForBrug(item, changed);
-      });
-
-      // open-state bijwerken voor volgende ronde
-      const newState = {};
-      brugDataCache.forEach((item) => {
-        const d = item.Data || {};
-        const id = item.Id;
-        if (id != null) newState[id] = !!d.open;
-      });
-      prevOpenState = newState;
-    }
-
-    function addMarkerForBrug(item, changed) {
-      const d = item.Data || {};
-      const lat = d.latitude;
-      const lon = d.longitude;
-      const naam = d.Naam || d.naam || "Onbekende brug";
-
-      const marker = L.marker([lat, lon], {
-        icon: d.open ? iconOpen : iconClosed
-      });
-
-      const popupHTML = `
-        <strong>${naam}</strong><br><br>
-        Huidige status: ${d.SituationCurrent ?? "-"}<br>
-        Voorspeld: ${d.SituationVoorspeld ?? "-"}<br>
-        Brug open? <b>${d.open ? "Ja" : "Nee"}</b><br><br>
-        Laatste update:<br>
-        ${
-          d.GetDatumStart
-            ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
-            : "-"
-        }
-      `;
-
-      marker.bindPopup(popupHTML);
-      clusterGroup.addLayer(marker);
-      markers.push({ marker, id: item.Id, naam });
-
-      // Styling/animatie pas toepassen als de icon in de DOM zit
-      setTimeout(() => {
-        const iconEl = marker._icon;
-        if (!iconEl) return;
-        iconEl.classList.add("marker-fade-in");
-        if (changed) {
-          iconEl.classList.add("marker-blink");
-        }
-      }, 50);
-    }
-
-    /* --------------------------------------------------------
-       PROVINCIES
-    --------------------------------------------------------- */
-    function updateProvinceOptions(data) {
-      const set = new Set();
-      data.forEach((item) => {
-        const d = item.Data || {};
-        const p =
-          d.provincie || d.Provincie || d.province || d.ProvincieNaam || null;
-        if (p) set.add(p.toString());
-      });
-
-      const current = currentProvinceFilter;
-      // eerst resetten
-      provinceSelect.innerHTML =
-        '<option value="all">Alle provincies</option>';
-
-      Array.from(set)
-        .sort((a, b) => a.localeCompare(b, "nl"))
-        .forEach((p) => {
-          const opt = document.createElement("option");
-          opt.value = p;
-          opt.textContent = p;
-          provinceSelect.appendChild(opt);
+        const marker = L.marker([d.latitude, d.longitude], {
+          icon: d.open ? iconOpen : iconClosed
         });
 
-      // poging huidige instelling te behouden
-      if (current !== "all") {
-        const found = Array.from(provinceSelect.options).some(
-          (o) => o.value === current
-        );
-        if (found) {
-          provinceSelect.value = current;
-        } else {
-          currentProvinceFilter = "all";
-          provinceSelect.value = "all";
-        }
-      }
+        marker.on("click", () => {
+          selectedId = b.Id;
+          showDetails(b);
+          sheet.classList.add("expanded");
+          map.flyTo(marker.getLatLng(), 14);
+        });
+
+        cluster.addLayer(marker);
+        markers.push({ marker, item: b });
+      });
     }
 
-    function onProvinceChange() {
-      currentProvinceFilter = provinceSelect.value || "all";
+    /* PROVINCIE FILTER */
+    const provinceSelect = document.getElementById("provinceFilter");
+
+    function updateProvinceOptions() {
+      const set = new Set();
+      bruggen.forEach(b => {
+        if (b.Data.provincie) set.add(b.Data.provincie);
+      });
+
+      const cur = provinceFilter;
+      provinceSelect.innerHTML = "<option value='all'>Alle provincies</option>";
+      [...set].sort().forEach(p => {
+        provinceSelect.innerHTML += `<option value="${p.toLowerCase()}">${p}</option>`;
+      });
+      provinceSelect.value = cur;
+    }
+
+    provinceSelect.onchange = () => {
+      provinceFilter = provinceSelect.value;
       renderMarkers();
-    }
+      clearSheet();
+    };
 
-    /* --------------------------------------------------------
-       STATUSFILTER
-    --------------------------------------------------------- */
-    function setStatusFilter(f) {
-      currentStatusFilter = f;
+    /* STATUS FILTER BUTTONS */
+    document.getElementById("fAll").onclick    = () => setStatus("all");
+    document.getElementById("fOpen").onclick   = () => setStatus("open");
+    document.getElementById("fClosed").onclick = () => setStatus("closed");
+
+    function setStatus(s) {
+      statusFilter = s;
+      document.getElementById("fAll").classList.toggle("active", s==="all");
+      document.getElementById("fOpen").classList.toggle("active", s==="open");
+      document.getElementById("fClosed").classList.toggle("active", s==="closed");
       renderMarkers();
+      clearSheet();
     }
 
-    /* --------------------------------------------------------
-       ZOEKEN OP NAAM
-    --------------------------------------------------------- */
-    function searchBrug() {
-      const query = searchInput.value.trim().toLowerCase();
-      if (!query) return;
-
-      // Zoek in huidige markers (dus met filters actief)
-      const found = markers.find((m) =>
-        m.naam.toLowerCase().includes(query)
+    /* ZOEKEN */
+    const searchInput = document.getElementById("searchInput");
+    searchInput.oninput = () => {
+      const q = searchInput.value.toLowerCase();
+      if (!q) return;
+      const m = markers.find(m =>
+        (m.item.Data.Naam || "").toLowerCase().includes(q)
       );
-      if (found) {
-        const latLng = found.marker.getLatLng();
-        map.setView(latLng, 14);
-        found.marker.openPopup();
-      } else {
-        alert("Geen brug gevonden met deze naam in de huidige filters.");
+      if (m) {
+        selectedId = m.item.Id;
+        showDetails(m.item);
+        sheet.classList.add("expanded");
+        map.flyTo(m.marker.getLatLng(), 14);
       }
+    };
+
+    /* DETAILSHEET */
+    const sheet = document.getElementById("sheet");
+    const sheetHeader = document.getElementById("sheetHeader");
+    const sheetTitle = document.getElementById("sheetTitle");
+    const sheetSubtitle = document.getElementById("sheetSubtitle");
+    const sheetBody = document.getElementById("bridgeDetails");
+
+    sheetHeader.onclick = () => sheet.classList.toggle("expanded");
+    map.on("click", () => sheet.classList.remove("expanded"));
+
+    function clearSheet() {
+      sheetTitle.textContent = "Geen brug geselecteerd";
+      sheetSubtitle.textContent = "Tik op een brug…";
+      sheetBody.innerHTML = "<div>Nog niets geselecteerd.</div>";
     }
 
-    // Enter in zoekveld triggert ook zoek
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        searchBrug();
+    function showDetails(b) {
+      const d = b.Data;
+      const isOpen = !!d.open; // als open true is → brugstatus "Open"
+      const statusText = isOpen ? "Open" : "Dicht";
+      const badgeClass = isOpen ? "open" : "closed";
+
+      sheetTitle.textContent = d.Naam;
+      sheetSubtitle.textContent = "Status: " + statusText;
+
+      const tijd = d.GetDatumStart
+        ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
+        : "-";
+
+      sheetBody.innerHTML = `
+        <div class="badge-status ${badgeClass}">
+          <span class="badge-dot"></span>
+          <strong>${statusText}</strong>
+        </div>
+
+        <dt>Status</dt>
+        <dd><strong>${statusText}</strong></dd>
+
+        <dt>Laatste update</dt>
+        <dd>${tijd}</dd>
+
+        <dt>Locatie</dt>
+        <dd>Lat: ${d.latitude.toFixed(5)}, Lon: ${d.longitude.toFixed(5)}</dd>
+      `;
+    }
+
+    function updateSheet() {
+      if (!selectedId) return;
+      const b = bruggen.find(x => x.Id === selectedId);
+      if (b) showDetails(b);
+    }
+
+    /* LOCATIE KNOP */
+    let userMarker = null;
+    document.getElementById("locBtn").onclick = () => {
+      if (!navigator.geolocation) {
+        alert("Locatie niet beschikbaar");
+        return;
       }
-    });
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
 
-    /* --------------------------------------------------------
-       AUTO-REFRESH
-    --------------------------------------------------------- */
-    // Elke 30 sec verversen
-    setInterval(loadBruggen, 30000);
+        if (!userMarker) {
+          userMarker = L.marker([lat,lon], {
+            icon: L.divIcon({
+              html: `<div style="width:14px;height:14px;border-radius:999px;border:2px solid white;background:#3498db"></div>`,
+              className: "",
+              iconSize:[16,16]
+            })
+          }).addTo(map);
+        } else {
+          userMarker.setLatLng([lat,lon]);
+        }
 
-    // Eerste laadbeurt
-    loadBruggen();
+        map.flyTo([lat,lon], 14);
+      }, () => {
+        alert("Kon locatie niet ophalen (HTTPS nodig).");
+      });
+    };
+
+    /* AUTO REFRESH */
+    load();
+    setInterval(load, 30000);
+
+    /* SERVICE WORKER */
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
   </script>
-  <div class="watermark">
-	Data afkomstig van <strong>NDW</strong> – Nationaal Dataportaal Wegverkeer
-  </div>
-
 </body>
 </html>
