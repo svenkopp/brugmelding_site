@@ -97,10 +97,13 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
         return;
     }
 
+    $amsTz = new DateTimeZone('Europe/Amsterdam');
+
     try {
         $timestampObj = new DateTime($timestamp);
+        $timestampObj->setTimezone($amsTz);
     } catch (Exception $e) {
-        $timestampObj = new DateTime();
+        $timestampObj = new DateTime('now', $amsTz);
     }
 
     $recordedAt = $timestampObj->format('Y-m-d H:i:s');
