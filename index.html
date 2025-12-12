@@ -301,7 +301,7 @@
       left: 6px;
       font-size: 10px;
       opacity: 0.25;
-      z-index: 4000;
+      z-index: 9001;
       pointer-events: none;
     }
     body.dark .watermark {
@@ -316,7 +316,7 @@
   <div class="top-bar">
     <div>
       <div class="top-title">Brugmelding</div>
-      <div class="top-subtitle">NDW – brugopeningen NL</div>
+      <div class="top-subtitle">Brugopeningen NL</div>
     </div>
 
     <button class="theme-toggle" id="themeToggle">
@@ -332,7 +332,7 @@
   <div class="loc-btn" id="locBtn" title="Mijn locatie">📍</div>
 
   <!-- WATERMARK -->
-  <div class="watermark">Data: NDW</div>
+  <div class="watermark">Gegevens afkomstig van NDW</div>
 
   <!-- FILTER PANEL -->
   <div class="map-panel controls">
@@ -551,9 +551,6 @@
           <span class="badge-dot"></span>
           <strong>${statusText}</strong>
         </div>
-
-        <dt>Status</dt>
-        <dd><strong>${statusText}</strong></dd>
 
         <dt>Laatste update</dt>
         <dd>${tijd}</dd>
