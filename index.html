@@ -614,7 +614,7 @@
       sheetStatusText.textContent = statusText;
 
       const tijd = d.GetDatumStart
-        ? dateTimeFormatter.format(new Date(d.GetDatumStart))
+        ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
         : "-";
 
       sheetSubtitle.textContent = `Laatste update: ${tijd}`;
@@ -681,7 +681,7 @@
     function applyDeepLinkIfNeeded() {
       if (deepLinkHandled || !deepLinkSlug) return;
 
-      const match = bruggen.find(b => slugify(b.Data?.naam) === deepLinkSlug);
+      const match = bruggen.find(b => slugify(b.Data?.Naam) === deepLinkSlug);
       if (match) {
         focusOnBridge(match);
         deepLinkHandled = true;
@@ -720,9 +720,11 @@
             const openedAt = item.opened_at ? new Date(item.opened_at) : null;
             const closedAt = item.closed_at ? new Date(item.closed_at) : null;
 
-            const dateStr = openedAt ? dateFormatter.format(openedAt) : "-";
-            const openTime = openedAt ? timeFormatter.format(openedAt) : "-";
-            const closeTime = closedAt ? timeFormatter.format(closedAt) : "-";
+            const dateStr = openedAt
+              ? `${pad(openedAt.getDate())}-${pad(openedAt.getMonth()+1)}-${openedAt.getFullYear()}`
+              : "-";
+            const openTime = openedAt ? `${pad(openedAt.getHours())}:${pad(openedAt.getMinutes())}` : "-";
+            const closeTime = closedAt ? `${pad(closedAt.getHours())}:${pad(closedAt.getMinutes())}` : "-";
 
             const durationSeconds = typeof item.seconds_since_previous_open === "number"
               ? item.seconds_since_previous_open
