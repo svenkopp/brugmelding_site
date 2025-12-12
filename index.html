@@ -8,9 +8,6 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <meta name="theme-color" content="#f6f6f6" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
   <link rel="icon" href="/favicon.ico" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
@@ -274,38 +271,6 @@
       background: currentColor;
     }
 
-    .history-list {
-      list-style: none;
-      padding: 0;
-      margin: 6px 0 0;
-    }
-
-    .history-list li {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 4px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      font-size: 12px;
-    }
-    body.dark .history-list li {
-      border-color: rgba(255,255,255,0.1);
-    }
-
-    .history-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.06);
-    }
-    body.dark .history-status {
-      background: rgba(255,255,255,0.08);
-    }
-    .history-status.open { color: var(--green); }
-    .history-status.closed { color: var(--red); }
-
     /* LOCATIE KNOP – netjes rechtsboven onder de topbar */
     .loc-btn {
       position: fixed;
@@ -336,7 +301,7 @@
       left: 6px;
       font-size: 10px;
       opacity: 0.25;
-      z-index: 9001;
+      z-index: 4000;
       pointer-events: none;
     }
     body.dark .watermark {
@@ -351,7 +316,7 @@
   <div class="top-bar">
     <div>
       <div class="top-title">Brugmelding</div>
-      <div class="top-subtitle">Brugopeningen NL</div>
+      <div class="top-subtitle">NDW – brugopeningen NL</div>
     </div>
 
     <button class="theme-toggle" id="themeToggle">
@@ -367,7 +332,7 @@
   <div class="loc-btn" id="locBtn" title="Mijn locatie">📍</div>
 
   <!-- WATERMARK -->
-  <div class="watermark">Gegevens afkomstig van NDW</div>
+  <div class="watermark">Data: NDW</div>
 
   <!-- FILTER PANEL -->
   <div class="map-panel controls">
@@ -420,15 +385,8 @@
     const darkTiles  = L.tileLayer("https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19});
 
     let theme = localStorage.getItem("theme") || "light";
-    const themeColorMeta = document.querySelector("meta[name='theme-color']");
-    const appleStatusMeta = document.querySelector("meta[name='apple-mobile-web-app-status-bar-style']");
-
-    function setBrowserChromeColors() {
-      const isDark = theme === "dark";
-      const color = isDark ? "#111111" : "#f6f6f6";
-      if (themeColorMeta) themeColorMeta.setAttribute("content", color);
-      if (appleStatusMeta) appleStatusMeta.setAttribute("content", isDark ? "black" : "default");
-    }
+    document.body.classList.toggle("dark", theme === "dark");
+    (theme === "dark" ? darkTiles : lightTiles).addTo(map);
 
     const cluster = L.markerClusterGroup();
     map.addLayer(cluster);
@@ -444,108 +402,34 @@
       themeToggle.querySelector(".icon").textContent =
         theme === "light" ? "🌙" : "☀️";
     }
+    updateThemeBtn();
 
-    function applyTheme(nextTheme, { persist = true } = {}) {
-      theme = nextTheme;
+    themeToggle.onclick = () => {
+      theme = theme === "light" ? "dark" : "light";
       document.body.classList.toggle("dark", theme === "dark");
       map.removeLayer(lightTiles); map.removeLayer(darkTiles);
       (theme === "dark" ? darkTiles : lightTiles).addTo(map);
-      if (persist) localStorage.setItem("theme", theme);
+      localStorage.setItem("theme", theme);
       updateThemeBtn();
-      setBrowserChromeColors();
-    }
-
-    updateThemeBtn();
-    applyTheme(theme, { persist: false });
-
-    themeToggle.onclick = () => {
-      applyTheme(theme === "light" ? "dark" : "light");
     };
 
     /* DATA */
     let bruggen = [];
     let markers = [];
     let selectedId = null;
-    let historyCache = {};
 
     let statusFilter = "all";
     let provinceFilter = "all";
 
-    async function fetchJson(url) {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Kon ${url} niet laden (HTTP ${response.status})`);
-      }
-      return response.json();
-    }
-
-    function normalizeOpenItem(item) {
-      const d = item.Data || {};
-      const normalized = { ...item, Data: { ...d } };
-
-      if (normalized.Data.provincie === undefined && normalized.Data.Provincie !== undefined) {
-        normalized.Data.provincie = normalized.Data.Provincie;
-      }
-      if (normalized.Data.stad === undefined && normalized.Data.Stad !== undefined) {
-        normalized.Data.stad = normalized.Data.Stad;
-      }
-
-      const status = d.status ?? d.image ?? "onbekend";
-      normalized.Data.status = status;
-
-      if (normalized.Data.open === undefined) {
-        normalized.Data.open = status === "open";
-      }
-
-      return normalized;
-    }
-
-    function normalizeBaseItem(item, index) {
-      const id = item.id || item.Id || item.ISRS || `brug-${index}`;
-      const latitude = Number(item.latitude ?? item.lat ?? item.Lat ?? 0);
-      const longitude = Number(item.longitude ?? item.lon ?? item.Lon ?? 0);
-      const naam = item.naam || item.Naam || "Onbekende brug";
-      const stad = item.stad || item.Stad || "";
-      const provincie = item.provincie || item.Provincie || "";
-
-      return {
-        Id: id,
-        Data: {
-          latitude,
-          longitude,
-          Naam: naam,
-          Stad: stad,
-          Provincie: provincie,
-          provincie,
-          stad,
-          SituationCurrent: null,
-          SituationVoorspeld: null,
-          ndwVersion: null,
-          GetDatumStart: null,
-          status: "onbekend",
-          open: false
-        }
-      };
-    }
-
-    async function load() {
-      try {
-        const data = await fetchJson("/get/bruggen_open.json");
-        bruggen = data.map(normalizeOpenItem);
-      } catch (err) {
-        console.warn("Valt terug op bruggen.json", err);
-        try {
-          const fallback = await fetchJson("/get/bruggen.json");
-          bruggen = fallback.map(normalizeBaseItem);
-        } catch (fallbackErr) {
-          console.error("Kon bruggegevens niet laden", fallbackErr);
-          bruggen = [];
-        }
-      }
-
-      updateProvinceOptions();
-      renderMarkers();
-      updateSheet();
+    function load() {
+      fetch("/get/bruggen_open.json")
+        .then(r => r.json())
+        .then(data => {
+          bruggen = data;
+          updateProvinceOptions();
+          renderMarkers();
+          updateSheet();
+        });
     }
 
     function renderMarkers() {
@@ -667,6 +551,9 @@
           <span class="badge-dot"></span>
           <strong>${statusText}</strong>
         </div>
+
+        <dt>Status</dt>
+        <dd><strong>${statusText}</strong></dd>
 
         <dt>Laatste update</dt>
         <dd>${tijd}</dd>
