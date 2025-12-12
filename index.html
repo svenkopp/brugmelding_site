@@ -274,6 +274,38 @@
       background: currentColor;
     }
 
+    .history-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 0;
+    }
+
+    .history-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-size: 12px;
+    }
+    body.dark .history-list li {
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .history-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.06);
+    }
+    body.dark .history-status {
+      background: rgba(255,255,255,0.08);
+    }
+    .history-status.open { color: var(--green); }
+    .history-status.closed { color: var(--red); }
+
     /* LOCATIE KNOP – netjes rechtsboven onder de topbar */
     .loc-btn {
       position: fixed;
@@ -434,6 +466,7 @@
     let bruggen = [];
     let markers = [];
     let selectedId = null;
+    let historyCache = {};
 
     let statusFilter = "all";
     let provinceFilter = "all";
@@ -442,7 +475,12 @@
       fetch("/get/bruggen_open.json")
         .then(r => r.json())
         .then(data => {
-          bruggen = data;
+          bruggen = data.map(item => {
+            const d = item.Data || {};
+            if (d.provincie === undefined && d.Provincie !== undefined) d.provincie = d.Provincie;
+            if (d.stad === undefined && d.Stad !== undefined) d.stad = d.Stad;
+            return item;
+          });
           updateProvinceOptions();
           renderMarkers();
           updateSheet();

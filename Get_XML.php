@@ -3,11 +3,15 @@
 // Snelle, robuuste versie met automatische JSON-check voor foute bruggen.
 // Zorg dat map 'get' schrijfbaar is door de webserver voor log & output.
 
+require_once __DIR__ . '/db_helpers.php';
+
 // ---------- Config ----------
 $jsonInputFile  = __DIR__ . '/get/bruggen.json';
 $jsonOutputFile = __DIR__ . '/get/bruggen_open.json';
 $logBadFile     = __DIR__ . '/get/foute_bruggen.log';
 $ndwUrl         = "http://opendata.ndw.nu/brugopeningen.xml.gz";
+
+$dbConfig = load_db_config();
 
 // ---------- Helpers ----------
 function safe_get_string($var) {
@@ -82,6 +86,10 @@ foreach ($bruggen_raw as $index => $item) {
 if (count($bruggen) === 0) {
     die("Geen geldige bruggen gevonden na validatie. Kijk in $logBadFile voor details.\n");
 }
+
+// ---------- Database init ----------
+$historyTable = sanitize_table_name($dbConfig['table']);
+$pdo = init_db($dbConfig, $historyTable);
 
 // ---------- NDW XML ophalen en parsen ----------
 $xml_gz_content = @file_get_contents($ndwUrl);
@@ -225,6 +233,9 @@ foreach ($bruggen as $brug) {
         $GetDatumStart      = (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
     }
 
+    $statusMoment = $GetDatumStart ?: (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
+    log_status($pdo, $brug['id'], $image, $statusMoment, $historyTable);
+
     // Bouw output voor deze brug
     $dataArray[] = [
         'Id' => $brug['id'],
@@ -236,10 +247,10 @@ foreach ($bruggen as $brug) {
             'ndwVersion' => $ndwVersion,
             'GetDatumStart' => $GetDatumStart,
             'Naam' => $brug['naam'],
-			'Provincie' => $brug['provincie'],
-			'Stad' => $brug['stad'],
+            'Provincie' => $brug['provincie'],
+            'Stad' => $brug['stad'],
             'image' => $image,
-			'open' => ($image === "open") ? true : false
+            'open' => ($image === "open") ? true : false
         ]
     ];
 }
