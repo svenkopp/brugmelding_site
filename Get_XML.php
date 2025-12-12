@@ -89,7 +89,18 @@ if (count($bruggen) === 0) {
 
 // ---------- Database init ----------
 $historyTable = sanitize_table_name($dbConfig['table']);
-$pdo = init_db($dbConfig, $historyTable);
+$pdo = null;
+
+try {
+    $pdo = init_db($dbConfig, $historyTable);
+} catch (Throwable $e) {
+    // Geen database beschikbaar: log dit en ga verder zodat de hoofdscript niet crasht
+    file_put_contents(
+        $logBadFile,
+        date('c') . " - Database niet beschikbaar: " . $e->getMessage() . "\n",
+        FILE_APPEND
+    );
+}
 
 // ---------- NDW XML ophalen en parsen ----------
 $xml_gz_content = @file_get_contents($ndwUrl);
