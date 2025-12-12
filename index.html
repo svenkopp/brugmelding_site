@@ -271,6 +271,38 @@
       background: currentColor;
     }
 
+    .history-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 0;
+    }
+
+    .history-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-size: 12px;
+    }
+    body.dark .history-list li {
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .history-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.06);
+    }
+    body.dark .history-status {
+      background: rgba(255,255,255,0.08);
+    }
+    .history-status.open { color: var(--green); }
+    .history-status.closed { color: var(--red); }
+
     /* LOCATIE KNOP – netjes rechtsboven onder de topbar */
     .loc-btn {
       position: fixed;
@@ -417,6 +449,7 @@
     let bruggen = [];
     let markers = [];
     let selectedId = null;
+    let historyCache = {};
 
     let statusFilter = "all";
     let provinceFilter = "all";
@@ -425,7 +458,12 @@
       fetch("/get/bruggen_open.json")
         .then(r => r.json())
         .then(data => {
-          bruggen = data;
+          bruggen = data.map(item => {
+            const d = item.Data || {};
+            if (d.provincie === undefined && d.Provincie !== undefined) d.provincie = d.Provincie;
+            if (d.stad === undefined && d.Stad !== undefined) d.stad = d.Stad;
+            return item;
+          });
           updateProvinceOptions();
           renderMarkers();
           updateSheet();
@@ -546,6 +584,11 @@
         ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
         : "-";
 
+      const history = historyCache[b.Id];
+      const historyHtml = history
+        ? renderHistory(history)
+        : "<div>Geschiedenis wordt geladen…</div>";
+
       sheetBody.innerHTML = `
         <div class="badge-status ${badgeClass}">
           <span class="badge-dot"></span>
@@ -560,7 +603,45 @@
 
         <dt>Locatie</dt>
         <dd>Lat: ${d.latitude.toFixed(5)}, Lon: ${d.longitude.toFixed(5)}</dd>
+
+        <dt>Statusgeschiedenis</dt>
+        <dd id="historySlot">${historyHtml}</dd>
       `;
+
+      if (!history) {
+        loadHistory(b.Id);
+      }
+    }
+
+    function renderHistory(history) {
+      if (!Array.isArray(history) || history.length === 0) {
+        return "<div>Geen geschiedenis beschikbaar.</div>";
+      }
+
+      return `<ul class="history-list">${history.map(item => {
+        const label = item.status === "open" ? "Open" : (item.status === "dicht" || item.status === "Situatie_dicht") ? "Dicht" : (item.status || "-");
+        const statusClass = item.status === "open" ? "open" : "closed";
+        const time = item.recorded_at ? new Date(item.recorded_at).toLocaleString("nl-NL") : "-";
+        return '<li><span class="history-status ' + statusClass + '\">' + label + '</span><span class="history-time">' + time + '</span></li>';
+      }).join("")}</ul>`;
+    }
+
+    function loadHistory(bridgeId) {
+      fetch(`/get/history.php?id=${encodeURIComponent(bridgeId)}`)
+        .then(r => r.json())
+        .then(data => {
+          historyCache[bridgeId] = data;
+          if (selectedId === bridgeId) {
+            const slot = document.getElementById("historySlot");
+            if (slot) slot.innerHTML = renderHistory(data);
+          }
+        })
+        .catch(() => {
+          if (selectedId === bridgeId) {
+            const slot = document.getElementById("historySlot");
+            if (slot) slot.innerHTML = "<div>Geschiedenis kan niet geladen worden.</div>";
+          }
+        });
     }
 
     function updateSheet() {
