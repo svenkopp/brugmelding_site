@@ -141,7 +141,7 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
 /**
  * Haal de laatste statusmutaties op (nieuwste eerst).
  */
-function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5)
+function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5, $hours = 24)
 {
     $update = $pdo->prepare(
         "UPDATE `{$table}` SET seconds_since_previous_open = TIMESTAMPDIFF(SECOND, opened_at, COALESCE(closed_at, NOW())) WHERE bridge_id = ? AND opened_at IS NOT NULL"
@@ -149,10 +149,11 @@ function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5)
     $update->execute([$bridgeId]);
 
     $stmt = $pdo->prepare(
-        "SELECT status, recorded_at, opened_at, closed_at, TIMESTAMPDIFF(SECOND, opened_at, COALESCE(closed_at, NOW())) AS seconds_since_previous_open FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT ?"
+        "SELECT status, recorded_at, opened_at, closed_at, TIMESTAMPDIFF(SECOND, opened_at, COALESCE(closed_at, NOW())) AS seconds_since_previous_open FROM `{$table}` WHERE bridge_id = ? AND STR_TO_DATE(recorded_at, '%Y-%m-%d %H:%i:%s') >= DATE_SUB(NOW(), INTERVAL ? HOUR) ORDER BY id DESC LIMIT ?"
     );
     $stmt->bindValue(1, $bridgeId);
-    $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
+    $stmt->bindValue(2, (int)$hours, PDO::PARAM_INT);
+    $stmt->bindValue(3, (int)$limit, PDO::PARAM_INT);
     $stmt->execute();
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
