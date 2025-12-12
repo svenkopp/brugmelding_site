@@ -54,13 +54,30 @@ function init_db($config, $table)
             bridge_id VARCHAR(255) NOT NULL,
             status VARCHAR(32) NOT NULL,
             recorded_at VARCHAR(64) NOT NULL,
+            opened_at DATETIME NULL,
+            closed_at DATETIME NULL,
+            seconds_since_previous_open INT UNSIGNED NULL,
             PRIMARY KEY (id),
             INDEX bridge_id_idx (bridge_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
         $table
     ));
 
+    ensure_column($pdo, $table, 'opened_at', 'DATETIME NULL');
+    ensure_column($pdo, $table, 'closed_at', 'DATETIME NULL');
+    ensure_column($pdo, $table, 'seconds_since_previous_open', 'INT UNSIGNED NULL');
+
     return $pdo;
+}
+
+function ensure_column(PDO $pdo, $table, $column, $definition)
+{
+    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
+    $stmt->execute([$column]);
+
+    if ($stmt->fetch(PDO::FETCH_ASSOC) === false) {
+        $pdo->exec(sprintf('ALTER TABLE `%s` ADD COLUMN `%s` %s', $table, $column, $definition));
+    }
 }
 
 /**
@@ -73,16 +90,52 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
         return;
     }
 
-    $stmt = $pdo->prepare("SELECT status, recorded_at FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT 1");
+    try {
+        $timestampObj = new DateTime($timestamp);
+    } catch (Exception $e) {
+        $timestampObj = new DateTime();
+    }
+
+    $recordedAt = $timestampObj->format('Y-m-d H:i:s');
+    $isOpen = ($status === 'open');
+
+    $stmt = $pdo->prepare("SELECT id, status, opened_at, closed_at FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT 1");
     $stmt->execute([$bridgeId]);
     $last = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($last && $last['status'] === $status) {
-        return; // geen wijziging ten opzichte van vorige status
-    }
+    if ($isOpen) {
+        if ($last && $last['status'] === 'open') {
+            return; // geen wijziging ten opzichte van vorige status
+        }
 
-    $insert = $pdo->prepare("INSERT INTO `{$table}` (bridge_id, status, recorded_at) VALUES (?, ?, ?)");
-    $insert->execute([$bridgeId, $status, $timestamp]);
+        $insert = $pdo->prepare(
+            "INSERT INTO `{$table}` (bridge_id, status, recorded_at, opened_at, seconds_since_previous_open) VALUES (?, ?, ?, ?, ?)"
+        );
+        $insert->execute([$bridgeId, $status, $recordedAt, $recordedAt, 0]);
+    } else {
+        $openStmt = $pdo->prepare(
+            "SELECT id, opened_at FROM `{$table}` WHERE bridge_id = ? AND opened_at IS NOT NULL AND closed_at IS NULL ORDER BY id DESC LIMIT 1"
+        );
+        $openStmt->execute([$bridgeId]);
+        $openRow = $openStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($openRow) {
+            $openedAt = $openRow['opened_at'] ? new DateTime($openRow['opened_at']) : null;
+            $secondsOpen = ($openedAt instanceof DateTime)
+                ? max(0, $timestampObj->getTimestamp() - $openedAt->getTimestamp())
+                : null;
+
+            $update = $pdo->prepare(
+                "UPDATE `{$table}` SET status = ?, recorded_at = ?, closed_at = ?, seconds_since_previous_open = ? WHERE id = ?"
+            );
+            $update->execute([$status, $recordedAt, $recordedAt, $secondsOpen, $openRow['id']]);
+        } elseif (!$last || $last['status'] !== $status) {
+            $insert = $pdo->prepare(
+                "INSERT INTO `{$table}` (bridge_id, status, recorded_at) VALUES (?, ?, ?)"
+            );
+            $insert->execute([$bridgeId, $status, $recordedAt]);
+        }
+    }
 }
 
 /**
@@ -90,7 +143,14 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
  */
 function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5)
 {
-    $stmt = $pdo->prepare("SELECT status, recorded_at FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT ?");
+    $update = $pdo->prepare(
+        "UPDATE `{$table}` SET seconds_since_previous_open = TIMESTAMPDIFF(SECOND, opened_at, COALESCE(closed_at, NOW())) WHERE bridge_id = ? AND opened_at IS NOT NULL"
+    );
+    $update->execute([$bridgeId]);
+
+    $stmt = $pdo->prepare(
+        "SELECT status, recorded_at, opened_at, closed_at, TIMESTAMPDIFF(SECOND, opened_at, COALESCE(closed_at, NOW())) AS seconds_since_previous_open FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT ?"
+    );
     $stmt->bindValue(1, $bridgeId);
     $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
     $stmt->execute();

@@ -230,22 +230,22 @@ foreach ($bruggen as $brug) {
         $GetDatumStart = (string)($found->situationRecord->validity->validityTimeSpecification->overallStartTime ?? '');
 
         if ($SituationVoorspeld === "certain") {
-            $image = "open";
+            $status = "open";
         } elseif ($SituationVoorspeld === "probable") {
-            $image = "voorspeld";
+            $status = "voorspeld";
         } else {
-            $image = "dicht";
+            $status = "dicht";
         }
     } else {
         $SituationCurrent   = "certain";
         $SituationVoorspeld = "beingTerminated";
         $ndwVersion         = "0";
-        $image              = "Situatie_dicht";
+        $status             = "dicht";
         $GetDatumStart      = (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
     }
 
     $statusMoment = $GetDatumStart ?: (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
-    log_status($pdo, $brug['id'], $image, $statusMoment, $historyTable);
+    log_status($pdo, $brug['id'], $status, $statusMoment, $historyTable);
 
     // Bouw output voor deze brug
     $dataArray[] = [
@@ -260,8 +260,8 @@ foreach ($bruggen as $brug) {
             'Naam' => $brug['naam'],
             'Provincie' => $brug['provincie'],
             'Stad' => $brug['stad'],
-            'image' => $image,
-            'open' => ($image === "open") ? true : false
+            'status' => $status,
+            'open' => ($status === "open") ? true : false
         ]
     ];
 }
