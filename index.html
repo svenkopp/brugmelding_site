@@ -8,6 +8,9 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
+  <meta name="theme-color" content="#f6f6f6" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
   <link rel="icon" href="/favicon.ico" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
@@ -385,8 +388,15 @@
     const darkTiles  = L.tileLayer("https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {maxZoom:19});
 
     let theme = localStorage.getItem("theme") || "light";
-    document.body.classList.toggle("dark", theme === "dark");
-    (theme === "dark" ? darkTiles : lightTiles).addTo(map);
+    const themeColorMeta = document.querySelector("meta[name='theme-color']");
+    const appleStatusMeta = document.querySelector("meta[name='apple-mobile-web-app-status-bar-style']");
+
+    function setBrowserChromeColors() {
+      const isDark = theme === "dark";
+      const color = isDark ? "#111111" : "#f6f6f6";
+      if (themeColorMeta) themeColorMeta.setAttribute("content", color);
+      if (appleStatusMeta) appleStatusMeta.setAttribute("content", isDark ? "black" : "default");
+    }
 
     const cluster = L.markerClusterGroup();
     map.addLayer(cluster);
@@ -402,15 +412,22 @@
       themeToggle.querySelector(".icon").textContent =
         theme === "light" ? "🌙" : "☀️";
     }
-    updateThemeBtn();
 
-    themeToggle.onclick = () => {
-      theme = theme === "light" ? "dark" : "light";
+    function applyTheme(nextTheme, { persist = true } = {}) {
+      theme = nextTheme;
       document.body.classList.toggle("dark", theme === "dark");
       map.removeLayer(lightTiles); map.removeLayer(darkTiles);
       (theme === "dark" ? darkTiles : lightTiles).addTo(map);
-      localStorage.setItem("theme", theme);
+      if (persist) localStorage.setItem("theme", theme);
       updateThemeBtn();
+      setBrowserChromeColors();
+    }
+
+    updateThemeBtn();
+    applyTheme(theme, { persist: false });
+
+    themeToggle.onclick = () => {
+      applyTheme(theme === "light" ? "dark" : "light");
     };
 
     /* DATA */
