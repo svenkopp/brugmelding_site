@@ -1,6 +1,8 @@
 <?php
 // Gemeenschappelijke database helperfuncties
 
+date_default_timezone_set('Europe/Amsterdam');
+
 function default_db_config() {
     return [
         'host' => getenv('DB_HOST') ?: '127.0.0.1',
@@ -48,6 +50,11 @@ function init_db($config, $table)
 
     $pdo = new PDO($dsn, $config['user'], $config['pass']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    try {
+        $pdo->exec("SET time_zone = 'Europe/Amsterdam'");
+    } catch (PDOException $e) {
+        // Als de time zone niet beschikbaar is, gaan we verder met de default.
+    }
     $pdo->exec(sprintf(
         'CREATE TABLE IF NOT EXISTS `%s` (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
