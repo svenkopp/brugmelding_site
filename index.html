@@ -661,10 +661,20 @@
       return slugify(firstSegment);
     }
 
+    function updateUrlForBridge(bridge) {
+      const slug = slugify(bridge?.Data?.Naam);
+      const newPath = slug ? `/${slug}` : "/";
+
+      if (window.location.pathname !== newPath) {
+        history.replaceState({}, "", newPath);
+      }
+    }
+
     function focusOnBridge(bridge, latLngOverride = null) {
       selectedId = bridge.Id;
       showDetails(bridge);
       sheet.classList.add("expanded");
+      updateUrlForBridge(bridge);
 
       const markerEntry = markers.find(m => m.item.Id === bridge.Id);
       const targetLatLng = latLngOverride

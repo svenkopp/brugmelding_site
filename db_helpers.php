@@ -87,6 +87,20 @@ function ensure_column(PDO $pdo, $table, $column, $definition)
     }
 }
 
+function format_datetime_amsterdam(?string $value)
+{
+    if (!$value) {
+        return null;
+    }
+
+    try {
+        $dt = new DateTime($value, new DateTimeZone('Europe/Amsterdam'));
+        return $dt->format(DateTime::ATOM);
+    } catch (Exception $e) {
+        return $value;
+    }
+}
+
 /**
  * Sla een status op als deze gewijzigd is t.o.v. de laatst bekende.
  */
@@ -97,10 +111,13 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
         return;
     }
 
+    $amsTz = new DateTimeZone('Europe/Amsterdam');
+
     try {
         $timestampObj = new DateTime($timestamp);
+        $timestampObj->setTimezone($amsTz);
     } catch (Exception $e) {
-        $timestampObj = new DateTime();
+        $timestampObj = new DateTime('now', $amsTz);
     }
 
     $recordedAt = $timestampObj->format('Y-m-d H:i:s');
@@ -163,5 +180,20 @@ function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5, $hours = 24)
     $stmt->bindValue(3, (int)$limit, PDO::PARAM_INT);
     $stmt->execute();
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $amsTz = new DateTimeZone('Europe/Amsterdam');
+
+    foreach ($rows as &$row) {
+        $row['opened_at'] = format_datetime_amsterdam($row['opened_at']);
+        $row['closed_at'] = format_datetime_amsterdam($row['closed_at']);
+
+        try {
+            $recordedDt = new DateTime($row['recorded_at'], $amsTz);
+            $row['recorded_at'] = $recordedDt->format(DateTime::ATOM);
+        } catch (Exception $e) {
+            // Laat de originele recorded_at staan als deze niet parsebaar is.
+        }
+    }
+
+    return $rows;
 }
