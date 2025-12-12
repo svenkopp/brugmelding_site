@@ -490,6 +490,13 @@
         normalized.Data.stad = normalized.Data.Stad;
       }
 
+      const status = d.status ?? d.image ?? "onbekend";
+      normalized.Data.status = status;
+
+      if (normalized.Data.open === undefined) {
+        normalized.Data.open = status === "open";
+      }
+
       return normalized;
     }
 
@@ -515,7 +522,7 @@
           SituationVoorspeld: null,
           ndwVersion: null,
           GetDatumStart: null,
-          image: "onbekend",
+          status: "onbekend",
           open: false
         }
       };
