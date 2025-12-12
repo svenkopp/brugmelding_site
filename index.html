@@ -225,6 +225,12 @@
       background: rgba(255,255,255,0.25);
     }
 
+    .sheet-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     .sheet-title {
       font-size: 15px;
       font-weight: 600;
@@ -251,7 +257,6 @@
       gap: 6px;
       padding: 4px 10px;
       border-radius: 999px;
-      margin-bottom: 10px;
       font-size: 12px;
     }
 	
@@ -269,6 +274,33 @@
       height: 8px;
       border-radius: 50%;
       background: currentColor;
+    }
+
+    .history-section {
+      margin-top: 12px;
+    }
+    .history-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .history-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-item {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    body.dark .history-item {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
     }
 
     /* LOCATIE KNOP – netjes rechtsboven onder de topbar */
@@ -359,12 +391,18 @@
   </div>
 
   <!-- DETAILSHEET -->
-  <div class="sheet" id="sheet">
-    <div class="sheet-header" id="sheetHeader">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title" id="sheetTitle">Geen brug geselecteerd</div>
-      <div class="sheet-subtitle" id="sheetSubtitle">Tik op een brug…</div>
-    </div>
+    <div class="sheet" id="sheet">
+      <div class="sheet-header" id="sheetHeader">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title-row">
+          <div class="sheet-title" id="sheetTitle">Geen brug geselecteerd</div>
+          <div class="badge-status" id="sheetStatus" hidden>
+            <span class="badge-dot"></span>
+            <strong id="sheetStatusText">-</strong>
+          </div>
+        </div>
+        <div class="sheet-subtitle" id="sheetSubtitle">Tik op een brug…</div>
+      </div>
 
     <div class="sheet-body">
       <dl id="bridgeDetails">
@@ -521,6 +559,8 @@
     const sheet = document.getElementById("sheet");
     const sheetHeader = document.getElementById("sheetHeader");
     const sheetTitle = document.getElementById("sheetTitle");
+    const sheetStatus = document.getElementById("sheetStatus");
+    const sheetStatusText = document.getElementById("sheetStatusText");
     const sheetSubtitle = document.getElementById("sheetSubtitle");
     const sheetBody = document.getElementById("bridgeDetails");
 
@@ -529,6 +569,7 @@
 
     function clearSheet() {
       sheetTitle.textContent = "Geen brug geselecteerd";
+      sheetStatus.hidden = true;
       sheetSubtitle.textContent = "Tik op een brug…";
       sheetBody.innerHTML = "<div>Nog niets geselecteerd.</div>";
     }
@@ -540,33 +581,90 @@
       const badgeClass = isOpen ? "open" : "closed";
 
       sheetTitle.textContent = d.Naam;
-      sheetSubtitle.textContent = "Status: " + statusText;
+      sheetStatus.hidden = false;
+      sheetStatus.className = `badge-status ${badgeClass}`;
+      sheetStatusText.textContent = statusText;
 
       const tijd = d.GetDatumStart
         ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
         : "-";
 
+      sheetSubtitle.textContent = `Laatste update: ${tijd}`;
+
       sheetBody.innerHTML = `
-        <div class="badge-status ${badgeClass}">
-          <span class="badge-dot"></span>
-          <strong>${statusText}</strong>
+        <div>
+          <div class="section-label">Locatie</div>
+          <div>Lat: ${d.latitude.toFixed(5)}, Lon: ${d.longitude.toFixed(5)}</div>
         </div>
 
-        <dt>Status</dt>
-        <dd><strong>${statusText}</strong></dd>
-
-        <dt>Laatste update</dt>
-        <dd>${tijd}</dd>
-
-        <dt>Locatie</dt>
-        <dd>Lat: ${d.latitude.toFixed(5)}, Lon: ${d.longitude.toFixed(5)}</dd>
+        <div class="history-section">
+          <div class="history-title">Geschiedenis (laatste 24 uur)</div>
+          <ul class="history-list" id="historyList">
+            <li class="history-item">Laden…</li>
+          </ul>
+        </div>
       `;
+
+      renderHistory(b.Id);
     }
 
     function updateSheet() {
       if (!selectedId) return;
       const b = bruggen.find(x => x.Id === selectedId);
       if (b) showDetails(b);
+    }
+
+    function pad(num) {
+      return num.toString().padStart(2, "0");
+    }
+
+    function formatDuration(seconds) {
+      const s = Math.max(0, Math.floor(seconds || 0));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+    }
+
+    function renderHistory(bridgeId) {
+      const list = document.getElementById("historyList");
+      if (!list) return;
+
+      fetch(`/get/history.php?id=${encodeURIComponent(bridgeId)}&limit=100&hours=24`)
+        .then(r => r.json())
+        .then(items => {
+          const openEvents = Array.isArray(items)
+            ? items.filter(item => item.opened_at)
+            : [];
+
+          if (openEvents.length === 0) {
+            list.innerHTML = '<li class="history-item">Geen gebeurtenissen in de laatste 24 uur.</li>';
+            return;
+          }
+
+          list.innerHTML = openEvents.map(item => {
+            const openedAt = item.opened_at ? new Date(item.opened_at) : null;
+            const closedAt = item.closed_at ? new Date(item.closed_at) : null;
+
+            const dateStr = openedAt
+              ? `${pad(openedAt.getDate())}-${pad(openedAt.getMonth()+1)}-${openedAt.getFullYear()}`
+              : "-";
+            const openTime = openedAt ? `${pad(openedAt.getHours())}:${pad(openedAt.getMinutes())}` : "-";
+            const closeTime = closedAt ? `${pad(closedAt.getHours())}:${pad(closedAt.getMinutes())}` : "-";
+
+            const durationSeconds = typeof item.seconds_since_previous_open === "number"
+              ? item.seconds_since_previous_open
+              : (openedAt && closedAt) ? (closedAt.getTime() - openedAt.getTime()) / 1000 : null;
+            const duration = durationSeconds !== null && durationSeconds !== undefined
+              ? formatDuration(durationSeconds)
+              : "-";
+
+            return `<li class="history-item">${dateStr} - ${openTime} - ${closeTime} - ${duration}</li>`;
+          }).join("");
+        })
+        .catch(() => {
+          list.innerHTML = '<li class="history-item">Kon geschiedenis niet laden.</li>';
+        });
     }
 
     /* LOCATIE KNOP */

@@ -9,6 +9,8 @@ $historyTable = sanitize_table_name($dbConfig['table']);
 $bridgeId = isset($_GET['id']) ? trim((string)$_GET['id']) : '';
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
 $limit = $limit > 0 ? $limit : 10;
+$hours = isset($_GET['hours']) ? (int)$_GET['hours'] : 24;
+$hours = $hours > 0 ? $hours : 24;
 
 if ($bridgeId === '') {
     http_response_code(400);
@@ -18,7 +20,7 @@ if ($bridgeId === '') {
 
 try {
     $pdo = init_db($dbConfig, $historyTable);
-    $history = fetch_history($pdo, $bridgeId, $historyTable, $limit);
+    $history = fetch_history($pdo, $bridgeId, $historyTable, $limit, $hours);
     echo json_encode($history);
 } catch (Throwable $e) {
     http_response_code(500);
