@@ -459,6 +459,9 @@
     let statusFilter = "all";
     let provinceFilter = "all";
 
+    const deepLinkSlug = getDeepLinkSlug();
+    let deepLinkHandled = false;
+
     function load() {
       fetch("/get/bruggen_open.json")
         .then(r => r.json())
@@ -466,6 +469,7 @@
           bruggen = data;
           updateProvinceOptions();
           renderMarkers();
+          applyDeepLinkIfNeeded();
           updateSheet();
         });
     }
@@ -491,10 +495,7 @@
         });
 
         marker.on("click", () => {
-          selectedId = b.Id;
-          showDetails(b);
-          sheet.classList.add("expanded");
-          map.flyTo(marker.getLatLng(), 14);
+          focusOnBridge(b, marker.getLatLng());
         });
 
         cluster.addLayer(marker);
@@ -612,6 +613,52 @@
       if (!selectedId) return;
       const b = bruggen.find(x => x.Id === selectedId);
       if (b) showDetails(b);
+    }
+
+    function slugify(str) {
+      return (str || "")
+        .toString()
+        .toLowerCase()
+        .replace(/[\s_]+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function getDeepLinkSlug() {
+      const path = decodeURIComponent(window.location.pathname)
+        .replace(/^\/+|\/+$/g, "");
+
+      if (!path) return null;
+      const firstSegment = path.split("/")[0];
+      return slugify(firstSegment);
+    }
+
+    function focusOnBridge(bridge, latLngOverride = null) {
+      selectedId = bridge.Id;
+      showDetails(bridge);
+      sheet.classList.add("expanded");
+
+      const markerEntry = markers.find(m => m.item.Id === bridge.Id);
+      const targetLatLng = latLngOverride
+        || markerEntry?.marker.getLatLng()
+        || (bridge.Data?.latitude && bridge.Data?.longitude
+            ? [bridge.Data.latitude, bridge.Data.longitude]
+            : null);
+
+      if (targetLatLng) {
+        map.flyTo(targetLatLng, 14);
+      }
+    }
+
+    function applyDeepLinkIfNeeded() {
+      if (deepLinkHandled || !deepLinkSlug) return;
+
+      const match = bruggen.find(b => slugify(b.Data?.naam) === deepLinkSlug);
+      if (match) {
+        focusOnBridge(match);
+        deepLinkHandled = true;
+      }
     }
 
     function pad(num) {
