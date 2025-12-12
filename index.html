@@ -416,6 +416,33 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
+    const NL_TIMEZONE = "Europe/Amsterdam";
+
+    const dateTimeFormatter = new Intl.DateTimeFormat("nl-NL", {
+      timeZone: NL_TIMEZONE,
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat("nl-NL", {
+      timeZone: NL_TIMEZONE,
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const timeFormatter = new Intl.DateTimeFormat("nl-NL", {
+      timeZone: NL_TIMEZONE,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
     /* MAP INIT */
     const map = L.map("map").setView([52.2, 5.3], 7);
 
@@ -587,7 +614,7 @@
       sheetStatusText.textContent = statusText;
 
       const tijd = d.GetDatumStart
-        ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
+        ? dateTimeFormatter.format(new Date(d.GetDatumStart))
         : "-";
 
       sheetSubtitle.textContent = `Laatste update: ${tijd}`;
@@ -654,7 +681,7 @@
     function applyDeepLinkIfNeeded() {
       if (deepLinkHandled || !deepLinkSlug) return;
 
-      const match = bruggen.find(b => slugify(b.Data?.Naam) === deepLinkSlug);
+      const match = bruggen.find(b => slugify(b.Data?.naam) === deepLinkSlug);
       if (match) {
         focusOnBridge(match);
         deepLinkHandled = true;
@@ -693,11 +720,9 @@
             const openedAt = item.opened_at ? new Date(item.opened_at) : null;
             const closedAt = item.closed_at ? new Date(item.closed_at) : null;
 
-            const dateStr = openedAt
-              ? `${pad(openedAt.getDate())}-${pad(openedAt.getMonth()+1)}-${openedAt.getFullYear()}`
-              : "-";
-            const openTime = openedAt ? `${pad(openedAt.getHours())}:${pad(openedAt.getMinutes())}` : "-";
-            const closeTime = closedAt ? `${pad(closedAt.getHours())}:${pad(closedAt.getMinutes())}` : "-";
+            const dateStr = openedAt ? dateFormatter.format(openedAt) : "-";
+            const openTime = openedAt ? timeFormatter.format(openedAt) : "-";
+            const closeTime = closedAt ? timeFormatter.format(closedAt) : "-";
 
             const durationSeconds = typeof item.seconds_since_previous_open === "number"
               ? item.seconds_since_previous_open
