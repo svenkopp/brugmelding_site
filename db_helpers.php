@@ -66,14 +66,19 @@ function init_db($config, $table)
 /**
  * Sla een status op als deze gewijzigd is t.o.v. de laatst bekende.
  */
-function log_status(PDO $pdo, $bridgeId, $status, $timestamp, $table)
+function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
 {
+    // Als de database niet beschikbaar is, slaan we de logging over zodat de hoofdscript kan doorgaan
+    if ($pdo === null) {
+        return;
+    }
+
     $stmt = $pdo->prepare("SELECT status, recorded_at FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT 1");
     $stmt->execute([$bridgeId]);
     $last = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($last && $last['status'] === $status && $last['recorded_at'] === $timestamp) {
-        return; // geen wijziging
+    if ($last && $last['status'] === $status) {
+        return; // geen wijziging ten opzichte van vorige status
     }
 
     $insert = $pdo->prepare("INSERT INTO `{$table}` (bridge_id, status, recorded_at) VALUES (?, ?, ?)");
