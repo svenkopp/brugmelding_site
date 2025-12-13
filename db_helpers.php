@@ -98,31 +98,11 @@ function format_datetime_amsterdam(?string $value)
     }
 
     try {
-        $dt = parse_ndw_timestamp($value);
-        return $dt ? $dt->format(DateTime::ATOM) : $value;
+        $dt = new DateTime($value, new DateTimeZone('Europe/Amsterdam'));
+        return $dt->format(DateTime::ATOM);
     } catch (Exception $e) {
         return $value;
     }
-}
-
-function parse_ndw_timestamp(?string $timestamp): ?DateTimeImmutable
-{
-    if ($timestamp === null || $timestamp === '') {
-        return null;
-    }
-
-    $amsTz = new DateTimeZone('Europe/Amsterdam');
-
-    // Als de string zelf een tijdzone bevat (Z of +hh:mm), eerst parsen en daarna naar Amsterdam converteren.
-    $hasExplicitTz = preg_match('/(Z|[+\-]\d{2}:?\d{2})$/', $timestamp) === 1;
-
-    if ($hasExplicitTz) {
-        $dt = new DateTimeImmutable($timestamp);
-        return $dt->setTimezone($amsTz);
-    }
-
-    // Zonder expliciete tijdzone behandelen we de waarde als reeds in Amsterdam-tijd.
-    return new DateTimeImmutable($timestamp, $amsTz);
 }
 
 /**
@@ -137,14 +117,16 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table, $rawTimes
 
     $amsTz = new DateTimeZone('Europe/Amsterdam');
 
-    $timestampObj = parse_ndw_timestamp($timestamp);
-    if (!$timestampObj) {
-        $timestampObj = new DateTimeImmutable('now', $amsTz);
+    try {
+        $timestampObj = new DateTime($timestamp);
+        $timestampObj->setTimezone($amsTz);
+    } catch (Exception $e) {
+        $timestampObj = new DateTime('now', $amsTz);
     }
 
     $recordedAt = $timestampObj->format('Y-m-d H:i:s');
     $isOpen = ($status === 'open');
-    $rawTimestamp = $rawTimestamp ?? $timestamp;
+    $rawTimestamp = $timestamp;
 
     $stmt = $pdo->prepare("SELECT id, status, opened_at, closed_at FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT 1");
     $stmt->execute([$bridgeId]);
@@ -206,13 +188,19 @@ function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5, $hours = 24)
         $closedRaw = $row['closed_at'];
 
         try {
-            $openedDt = parse_ndw_timestamp($openedRaw);
+            $openedDt = $openedRaw ? new DateTime($openedRaw) : null;
+            if ($openedDt) {
+                $openedDt->setTimezone($amsTz);
+            }
         } catch (Exception $e) {
             $openedDt = null;
         }
 
         try {
-            $closedDt = parse_ndw_timestamp($closedRaw);
+            $closedDt = $closedRaw ? new DateTime($closedRaw) : null;
+            if ($closedDt) {
+                $closedDt->setTimezone($amsTz);
+            }
         } catch (Exception $e) {
             $closedDt = null;
         }
