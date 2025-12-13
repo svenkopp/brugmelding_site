@@ -18,6 +18,24 @@ function safe_get_string($var) {
     return isset($var) ? (string)$var : '';
 }
 
+function ndw_timestamp_to_utc_iso8601(?string $timestamp)
+{
+    $utc = new DateTimeZone('UTC');
+
+    if ($timestamp !== null && $timestamp !== '') {
+        try {
+            $dt = parse_ndw_timestamp($timestamp);
+            if ($dt) {
+                return $dt->setTimezone($utc)->format('Y-m-d\TH:i:s.v\Z');
+            }
+        } catch (Exception $e) {
+            // fallback below
+        }
+    }
+
+    return (new DateTimeImmutable('now', $utc))->format('Y-m-d\TH:i:s.v\Z');
+}
+
 // ---------- Inlezen bruggen.json ----------
 if (!file_exists($jsonInputFile)) {
     die("Input bestand niet gevonden: $jsonInputFile\n");
@@ -137,7 +155,8 @@ if (!$datex || !isset($datex->d2LogicalModel->payloadPublication->situation)) {
 // ---------- Indexeer situaties op afgeronde coördinaten (lat_ lon) ----------
 // Hiermee voorkomen we n x m loops. We bewaren enkel situaties waarvan overallStartTime +2h > now
 $situationMap = [];
-$now = new DateTime();
+$utc = new DateTimeZone('UTC');
+$now = new DateTime('now', $utc);
 
 foreach ($arraySituation as $situation) {
 
@@ -241,11 +260,12 @@ foreach ($bruggen as $brug) {
         $SituationVoorspeld = "beingTerminated";
         $ndwVersion         = "0";
         $status             = "dicht";
-        $GetDatumStart      = (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
+        $GetDatumStart      = (new DateTime('now', $utc))->format('Y-m-d\TH:i:s.v\Z');
     }
 
-    $statusMoment = $GetDatumStart ?: (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
-    log_status($pdo, $brug['id'], $status, $statusMoment, $historyTable);
+    $statusMomentRaw = $GetDatumStart ?: null;
+    $statusMoment = ndw_timestamp_to_utc_iso8601($statusMomentRaw);
+    log_status($pdo, $brug['id'], $status, $statusMoment, $historyTable, $statusMomentRaw);
 
     // Bouw output voor deze brug
     $dataArray[] = [

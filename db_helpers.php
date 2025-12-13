@@ -108,7 +108,7 @@ function format_datetime_amsterdam(?string $value)
 /**
  * Sla een status op als deze gewijzigd is t.o.v. de laatst bekende.
  */
-function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
+function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table, $rawTimestamp = null)
 {
     // Als de database niet beschikbaar is, slaan we de logging over zodat de hoofdscript kan doorgaan
     if ($pdo === null) {
