@@ -10,12 +10,35 @@ $jsonInputFile  = __DIR__ . '/get/bruggen.json';
 $jsonOutputFile = __DIR__ . '/get/bruggen_open.json';
 $logBadFile     = __DIR__ . '/get/foute_bruggen.log';
 $ndwUrl         = "http://opendata.ndw.nu/brugopeningen.xml.gz";
+$ndwCacheFile   = __DIR__ . '/get/brugopeningen.xml.gz';
 
 $dbConfig = load_db_config();
 
 // ---------- Helpers ----------
 function safe_get_string($var) {
     return isset($var) ? (string)$var : '';
+}
+
+function parse_ndw_timestamp(string $timestamp): ?DateTimeImmutable
+{
+    $formats = [
+        'Y-m-d\TH:i:s.uP',
+        'Y-m-d\TH:i:sP',
+        'Y-m-d\TH:i:s\Z',
+    ];
+
+    foreach ($formats as $format) {
+        $parsed = DateTimeImmutable::createFromFormat($format, $timestamp);
+        if ($parsed instanceof DateTimeImmutable) {
+            return $parsed;
+        }
+    }
+
+    try {
+        return new DateTimeImmutable($timestamp);
+    } catch (Exception $e) {
+        return null;
+    }
 }
 
 function ndw_timestamp_to_utc_iso8601(?string $timestamp)
@@ -122,26 +145,48 @@ try {
 
 // ---------- NDW XML ophalen en parsen ----------
 $xml_gz_content = @file_get_contents($ndwUrl);
-if ($xml_gz_content === false) {
+$usedFallback   = false;
+
+if ($xml_gz_content === false || $xml_gz_content === '') {
     file_put_contents($logBadFile, date('c') . " - Fout bij ophalen NDW URL: $ndwUrl\n", FILE_APPEND);
-    die("Kon NDW XML niet ophalen.\n");
+
+    if (file_exists($ndwCacheFile)) {
+        $xml_gz_content = @file_get_contents($ndwCacheFile);
+        $usedFallback = true;
+    }
+} else {
+    // Bewaar succesvolle download als cache voor eventuele toekomstige uitval.
+    @file_put_contents($ndwCacheFile, $xml_gz_content);
 }
 
-$xml_content = @gzdecode($xml_gz_content);
-if ($xml_content === false) {
-    file_put_contents($logBadFile, date('c') . " - Fout bij gzdecode van NDW content\n", FILE_APPEND);
-    die("Fout bij gzdecode.\n");
+$rcXML = null;
+if ($xml_gz_content !== false && $xml_gz_content !== null && $xml_gz_content !== '') {
+    $xml_content = @gzdecode($xml_gz_content);
+    if ($xml_content === false) {
+        file_put_contents($logBadFile, date('c') . " - Fout bij gzdecode van NDW content\n", FILE_APPEND);
+    } else {
+        $rcXML = @simplexml_load_string($xml_content);
+        if ($rcXML === false) {
+            file_put_contents($logBadFile, date('c') . " - Fout bij simplexml_load_string op NDW content\n", FILE_APPEND);
+            $rcXML = null;
+        }
+    }
 }
 
-$rcXML = @simplexml_load_string($xml_content);
-if ($rcXML === false) {
-    file_put_contents($logBadFile, date('c') . " - Fout bij simplexml_load_string op NDW content\n", FILE_APPEND);
-    die("Fout bij parsen NDW XML.\n");
+if ($rcXML === null && !$usedFallback && file_exists($ndwCacheFile)) {
+    // Probeer alsnog de cache te gebruiken als primair verzoek niet werkte en parsing faalde.
+    $xml_gz_content = @file_get_contents($ndwCacheFile);
+    if ($xml_gz_content !== false && $xml_gz_content !== '') {
+        $xml_content = @gzdecode($xml_gz_content);
+        if ($xml_content !== false) {
+            $rcXML = @simplexml_load_string($xml_content);
+        }
+    }
 }
 
 // Navigeer naar situations (defensie tegen ontbrekende nodes)
-$envelope = $rcXML->children('http://schemas.xmlsoap.org/soap/envelope/');
-$body     = $envelope->Body ?? null;
+$envelope = $rcXML ? $rcXML->children('http://schemas.xmlsoap.org/soap/envelope/') : null;
+$body     = $envelope ? ($envelope->Body ?? null) : null;
 $datex    = $body ? $body->children('http://datex2.eu/schema/2/2_0') : null;
 
 if (!$datex || !isset($datex->d2LogicalModel->payloadPublication->situation)) {
