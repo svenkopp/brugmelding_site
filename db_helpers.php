@@ -63,6 +63,8 @@ function init_db($config, $table)
             recorded_at VARCHAR(64) NOT NULL,
             opened_at DATETIME NULL,
             closed_at DATETIME NULL,
+            opened_at_raw VARCHAR(128) NULL,
+            closed_at_raw VARCHAR(128) NULL,
             seconds_since_previous_open INT UNSIGNED NULL,
             PRIMARY KEY (id),
             INDEX bridge_id_idx (bridge_id)
@@ -72,6 +74,8 @@ function init_db($config, $table)
 
     ensure_column($pdo, $table, 'opened_at', 'DATETIME NULL');
     ensure_column($pdo, $table, 'closed_at', 'DATETIME NULL');
+    ensure_column($pdo, $table, 'opened_at_raw', 'VARCHAR(128) NULL');
+    ensure_column($pdo, $table, 'closed_at_raw', 'VARCHAR(128) NULL');
     ensure_column($pdo, $table, 'seconds_since_previous_open', 'INT UNSIGNED NULL');
 
     return $pdo;
@@ -122,6 +126,7 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
 
     $recordedAt = $timestampObj->format('Y-m-d H:i:s');
     $isOpen = ($status === 'open');
+    $rawTimestamp = $timestamp;
 
     $stmt = $pdo->prepare("SELECT id, status, opened_at, closed_at FROM `{$table}` WHERE bridge_id = ? ORDER BY id DESC LIMIT 1");
     $stmt->execute([$bridgeId]);
@@ -133,9 +138,9 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
         }
 
         $insert = $pdo->prepare(
-            "INSERT INTO `{$table}` (bridge_id, status, recorded_at, opened_at, seconds_since_previous_open) VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO `{$table}` (bridge_id, status, recorded_at, opened_at, opened_at_raw, seconds_since_previous_open) VALUES (?, ?, ?, ?, ?, ?)"
         );
-        $insert->execute([$bridgeId, $status, $recordedAt, $recordedAt, 0]);
+        $insert->execute([$bridgeId, $status, $recordedAt, $recordedAt, $rawTimestamp, 0]);
     } else {
         $openStmt = $pdo->prepare(
             "SELECT id, opened_at FROM `{$table}` WHERE bridge_id = ? AND opened_at IS NOT NULL AND closed_at IS NULL ORDER BY id DESC LIMIT 1"
@@ -150,9 +155,9 @@ function log_status(?PDO $pdo, $bridgeId, $status, $timestamp, $table)
                 : null;
 
             $update = $pdo->prepare(
-                "UPDATE `{$table}` SET status = ?, recorded_at = ?, closed_at = ?, seconds_since_previous_open = ? WHERE id = ?"
+                "UPDATE `{$table}` SET status = ?, recorded_at = ?, closed_at = ?, closed_at_raw = ?, seconds_since_previous_open = ? WHERE id = ?"
             );
-            $update->execute([$status, $recordedAt, $recordedAt, $secondsOpen, $openRow['id']]);
+            $update->execute([$status, $recordedAt, $recordedAt, $rawTimestamp, $secondsOpen, $openRow['id']]);
         } elseif (!$last || $last['status'] !== $status) {
             $insert = $pdo->prepare(
                 "INSERT INTO `{$table}` (bridge_id, status, recorded_at) VALUES (?, ?, ?)"
@@ -179,11 +184,38 @@ function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5, $hours = 24)
     $amsTz = new DateTimeZone('Europe/Amsterdam');
 
     foreach ($rows as &$row) {
-        $row['opened_at'] = format_datetime_amsterdam($row['opened_at']);
-        $row['closed_at'] = format_datetime_amsterdam($row['closed_at']);
+        $openedRaw = $row['opened_at'];
+        $closedRaw = $row['closed_at'];
 
         try {
-            $recordedDt = new DateTime($row['recorded_at'], $amsTz);
+            $openedDt = $openedRaw ? new DateTime($openedRaw) : null;
+            if ($openedDt) {
+                $openedDt->setTimezone($amsTz);
+            }
+        } catch (Exception $e) {
+            $openedDt = null;
+        }
+
+        try {
+            $closedDt = $closedRaw ? new DateTime($closedRaw) : null;
+            if ($closedDt) {
+                $closedDt->setTimezone($amsTz);
+            }
+        } catch (Exception $e) {
+            $closedDt = null;
+        }
+
+        $row['opened_at'] = $openedDt ? $openedDt->format(DateTime::ATOM) : format_datetime_amsterdam($openedRaw);
+        $row['closed_at'] = $closedDt ? $closedDt->format(DateTime::ATOM) : format_datetime_amsterdam($closedRaw);
+
+        if ($openedDt) {
+            $end = $closedDt ?: new DateTime('now', $amsTz);
+            $row['seconds_since_previous_open'] = max(0, $end->getTimestamp() - $openedDt->getTimestamp());
+        }
+
+        try {
+            $recordedDt = new DateTime($row['recorded_at']);
+            $recordedDt->setTimezone($amsTz);
             $row['recorded_at'] = $recordedDt->format(DateTime::ATOM);
         } catch (Exception $e) {
             // Laat de originele recorded_at staan als deze niet parsebaar is.
