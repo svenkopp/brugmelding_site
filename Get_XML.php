@@ -5,58 +5,19 @@
 
 require_once __DIR__ . '/db_helpers.php';
 
+date_default_timezone_set("UTC");
+
 // ---------- Config ----------
 $jsonInputFile  = __DIR__ . '/get/bruggen.json';
 $jsonOutputFile = __DIR__ . '/get/bruggen_open.json';
 $logBadFile     = __DIR__ . '/get/foute_bruggen.log';
 $ndwUrl         = "http://opendata.ndw.nu/brugopeningen.xml.gz";
-$ndwCacheFile   = __DIR__ . '/get/brugopeningen.xml.gz';
 
 $dbConfig = load_db_config();
 
 // ---------- Helpers ----------
 function safe_get_string($var) {
     return isset($var) ? (string)$var : '';
-}
-
-function parse_ndw_timestamp(string $timestamp): ?DateTimeImmutable
-{
-    $formats = [
-        'Y-m-d\TH:i:s.uP',
-        'Y-m-d\TH:i:sP',
-        'Y-m-d\TH:i:s\Z',
-    ];
-
-    foreach ($formats as $format) {
-        $parsed = DateTimeImmutable::createFromFormat($format, $timestamp);
-        if ($parsed instanceof DateTimeImmutable) {
-            return $parsed;
-        }
-    }
-
-    try {
-        return new DateTimeImmutable($timestamp);
-    } catch (Exception $e) {
-        return null;
-    }
-}
-
-function ndw_timestamp_to_utc_iso8601(?string $timestamp)
-{
-    $utc = new DateTimeZone('UTC');
-
-    if ($timestamp !== null && $timestamp !== '') {
-        try {
-            $dt = parse_ndw_timestamp($timestamp);
-            if ($dt) {
-                return $dt->setTimezone($utc)->format('Y-m-d\TH:i:s.v\Z');
-            }
-        } catch (Exception $e) {
-            // fallback below
-        }
-    }
-
-    return (new DateTimeImmutable('now', $utc))->format('Y-m-d\TH:i:s.v\Z');
 }
 
 // ---------- Inlezen bruggen.json ----------
@@ -145,48 +106,26 @@ try {
 
 // ---------- NDW XML ophalen en parsen ----------
 $xml_gz_content = @file_get_contents($ndwUrl);
-$usedFallback   = false;
-
-if ($xml_gz_content === false || $xml_gz_content === '') {
+if ($xml_gz_content === false) {
     file_put_contents($logBadFile, date('c') . " - Fout bij ophalen NDW URL: $ndwUrl\n", FILE_APPEND);
-
-    if (file_exists($ndwCacheFile)) {
-        $xml_gz_content = @file_get_contents($ndwCacheFile);
-        $usedFallback = true;
-    }
-} else {
-    // Bewaar succesvolle download als cache voor eventuele toekomstige uitval.
-    @file_put_contents($ndwCacheFile, $xml_gz_content);
+    die("Kon NDW XML niet ophalen.\n");
 }
 
-$rcXML = null;
-if ($xml_gz_content !== false && $xml_gz_content !== null && $xml_gz_content !== '') {
-    $xml_content = @gzdecode($xml_gz_content);
-    if ($xml_content === false) {
-        file_put_contents($logBadFile, date('c') . " - Fout bij gzdecode van NDW content\n", FILE_APPEND);
-    } else {
-        $rcXML = @simplexml_load_string($xml_content);
-        if ($rcXML === false) {
-            file_put_contents($logBadFile, date('c') . " - Fout bij simplexml_load_string op NDW content\n", FILE_APPEND);
-            $rcXML = null;
-        }
-    }
+$xml_content = @gzdecode($xml_gz_content);
+if ($xml_content === false) {
+    file_put_contents($logBadFile, date('c') . " - Fout bij gzdecode van NDW content\n", FILE_APPEND);
+    die("Fout bij gzdecode.\n");
 }
 
-if ($rcXML === null && !$usedFallback && file_exists($ndwCacheFile)) {
-    // Probeer alsnog de cache te gebruiken als primair verzoek niet werkte en parsing faalde.
-    $xml_gz_content = @file_get_contents($ndwCacheFile);
-    if ($xml_gz_content !== false && $xml_gz_content !== '') {
-        $xml_content = @gzdecode($xml_gz_content);
-        if ($xml_content !== false) {
-            $rcXML = @simplexml_load_string($xml_content);
-        }
-    }
+$rcXML = @simplexml_load_string($xml_content);
+if ($rcXML === false) {
+    file_put_contents($logBadFile, date('c') . " - Fout bij simplexml_load_string op NDW content\n", FILE_APPEND);
+    die("Fout bij parsen NDW XML.\n");
 }
 
 // Navigeer naar situations (defensie tegen ontbrekende nodes)
-$envelope = $rcXML ? $rcXML->children('http://schemas.xmlsoap.org/soap/envelope/') : null;
-$body     = $envelope ? ($envelope->Body ?? null) : null;
+$envelope = $rcXML->children('http://schemas.xmlsoap.org/soap/envelope/');
+$body     = $envelope->Body ?? null;
 $datex    = $body ? $body->children('http://datex2.eu/schema/2/2_0') : null;
 
 if (!$datex || !isset($datex->d2LogicalModel->payloadPublication->situation)) {
@@ -200,8 +139,7 @@ if (!$datex || !isset($datex->d2LogicalModel->payloadPublication->situation)) {
 // ---------- Indexeer situaties op afgeronde coördinaten (lat_ lon) ----------
 // Hiermee voorkomen we n x m loops. We bewaren enkel situaties waarvan overallStartTime +2h > now
 $situationMap = [];
-$utc = new DateTimeZone('UTC');
-$now = new DateTime('now', $utc);
+$now = new DateTime();
 
 foreach ($arraySituation as $situation) {
 
@@ -305,12 +243,11 @@ foreach ($bruggen as $brug) {
         $SituationVoorspeld = "beingTerminated";
         $ndwVersion         = "0";
         $status             = "dicht";
-        $GetDatumStart      = (new DateTime('now', $utc))->format('Y-m-d\TH:i:s.v\Z');
+        $GetDatumStart      = (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
     }
 
-    $statusMomentRaw = $GetDatumStart ?: null;
-    $statusMoment = ndw_timestamp_to_utc_iso8601($statusMomentRaw);
-    log_status($pdo, $brug['id'], $status, $statusMoment, $historyTable, $statusMomentRaw);
+    $statusMoment = $GetDatumStart ?: (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
+    log_status($pdo, $brug['id'], $status, $statusMoment, $historyTable);
 
     // Bouw output voor deze brug
     $dataArray[] = [
