@@ -179,28 +179,8 @@ function fetch_history(PDO $pdo, $bridgeId, $table, $limit = 5, $hours = 24)
     $amsTz = new DateTimeZone('Europe/Amsterdam');
 
     foreach ($rows as &$row) {
-        $openedRaw = $row['opened_at'];
-        $closedRaw = $row['closed_at'];
-
-        try {
-            $openedDt = $openedRaw ? new DateTime($openedRaw, $amsTz) : null;
-        } catch (Exception $e) {
-            $openedDt = null;
-        }
-
-        try {
-            $closedDt = $closedRaw ? new DateTime($closedRaw, $amsTz) : null;
-        } catch (Exception $e) {
-            $closedDt = null;
-        }
-
-        $row['opened_at'] = $openedDt ? $openedDt->format(DateTime::ATOM) : format_datetime_amsterdam($openedRaw);
-        $row['closed_at'] = $closedDt ? $closedDt->format(DateTime::ATOM) : format_datetime_amsterdam($closedRaw);
-
-        if ($openedDt) {
-            $end = $closedDt ?: new DateTime('now', $amsTz);
-            $row['seconds_since_previous_open'] = max(0, $end->getTimestamp() - $openedDt->getTimestamp());
-        }
+        $row['opened_at'] = format_datetime_amsterdam($row['opened_at']);
+        $row['closed_at'] = format_datetime_amsterdam($row['closed_at']);
 
         try {
             $recordedDt = new DateTime($row['recorded_at'], $amsTz);
