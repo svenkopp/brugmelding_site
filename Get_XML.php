@@ -11,6 +11,7 @@ date_default_timezone_set("UTC");
 $jsonInputFile  = __DIR__ . '/get/bruggen.json';
 $jsonOutputFile = __DIR__ . '/get/bruggen_open.json';
 $logBadFile     = __DIR__ . '/get/foute_bruggen.log';
+$missingNdwFile = __DIR__ . '/get/ontbrekende_ndw_ids.json';
 $ndwUrl         = "http://opendata.ndw.nu/brugopeningen.xml.gz";
 
 $dbConfig = load_db_config();
@@ -18,6 +19,91 @@ $dbConfig = load_db_config();
 // ---------- Helpers ----------
 function safe_get_string($var) {
     return isset($var) ? (string)$var : '';
+}
+
+function extract_ndw_identifier(SimpleXMLElement $situation): string {
+    $attributes = $situation->attributes();
+    $situationId = isset($attributes['id']) ? safe_get_string($attributes['id']) : '';
+
+    if ($situationId === '') {
+        return '';
+    }
+
+    $parts = explode('_', $situationId);
+    return $parts[1] ?? $situationId;
+}
+
+function parse_overall_start_time(SimpleXMLElement $situation): ?DateTime {
+    $startRaw = safe_get_string($situation->situationRecord->validity->validityTimeSpecification->overallStartTime ?? null);
+    if ($startRaw === '') {
+        return null;
+    }
+
+    try {
+        return new DateTime($startRaw);
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+function select_closest_situation(?SimpleXMLElement $current, SimpleXMLElement $candidate, DateTime $now): SimpleXMLElement {
+    if ($current === null) {
+        return $candidate;
+    }
+
+    $candidateStart = parse_overall_start_time($candidate);
+    if ($candidateStart === null) {
+        return $current;
+    }
+
+    $currentStart = parse_overall_start_time($current);
+    if ($currentStart === null) {
+        return $candidate;
+    }
+
+    $diffCandidate = abs($now->getTimestamp() - $candidateStart->getTimestamp());
+    $diffCurrent   = abs($now->getTimestamp() - $currentStart->getTimestamp());
+
+    return ($diffCandidate < $diffCurrent) ? $candidate : $current;
+}
+
+function load_missing_ndw_log(string $filePath): array {
+    if (!file_exists($filePath)) {
+        return [];
+    }
+
+    $content = file_get_contents($filePath);
+    $decoded = json_decode($content, true);
+
+    if (!is_array($decoded)) {
+        return [];
+    }
+
+    $map = [];
+    foreach ($decoded as $entry) {
+        if (!isset($entry['ndwID'])) continue;
+        $map[$entry['ndwID']] = $entry;
+    }
+
+    return $map;
+}
+
+function remember_missing_ndw(array &$missingMap, string $ndwId, array $brug): void {
+    if ($ndwId === '' || isset($missingMap[$ndwId])) {
+        return;
+    }
+
+    $missingMap[$ndwId] = [
+        'ndwID' => $ndwId,
+        'latitude' => isset($brug['latitude']) ? (float)$brug['latitude'] : null,
+        'longitude' => isset($brug['longitude']) ? (float)$brug['longitude'] : null,
+        'naam' => $brug['naam'] ?? '',
+        'firstSeen' => date('c')
+    ];
+}
+
+function save_missing_ndw_log(string $filePath, array $missingMap): void {
+    file_put_contents($filePath, json_encode(array_values($missingMap), JSON_PRETTY_PRINT));
 }
 
 // ---------- Inlezen bruggen.json ----------
@@ -51,6 +137,9 @@ foreach ($bruggen_raw as $index => $item) {
     }
     if (isset($item['Naam'])) {
         $item['naam'] = $item['Naam'];
+    }
+    if (isset($item['ndwid'])) {
+        $item['ndwID'] = $item['ndwid'];
     }
 
     // Vereiste velden (id, latitude, longitude, naam)
@@ -88,6 +177,9 @@ foreach ($bruggen_raw as $index => $item) {
 if (count($bruggen) === 0) {
     die("Geen geldige bruggen gevonden na validatie. Kijk in $logBadFile voor details.\n");
 }
+
+// ---------- Log voor ontbrekende NDW ID's ----------
+$missingNdwLog = load_missing_ndw_log($missingNdwFile);
 
 // ---------- Database init ----------
 $historyTable = sanitize_table_name($dbConfig['table']);
@@ -136,90 +228,41 @@ if (!$datex || !isset($datex->d2LogicalModel->payloadPublication->situation)) {
     $arraySituation = $datex->d2LogicalModel->payloadPublication->situation;
 }
 
-// ---------- Indexeer situaties op afgeronde coördinaten (lat_ lon) ----------
-// Hiermee voorkomen we n x m loops. We bewaren enkel situaties waarvan overallStartTime +2h > now
+// ---------- Indexeer situaties op NDW ID (uit het situation id attribuut) ----------
+// We bewaren enkel situaties waarvan overallStartTime +2h > now en kiezen de starttime die het dichtst bij nu ligt.
 $situationMap = [];
 $now = new DateTime();
 
 foreach ($arraySituation as $situation) {
+    $ndwIdentifier = extract_ndw_identifier($situation);
+    if ($ndwIdentifier === '') continue;
 
-    // Beveiliging: check of nodes bestaan
-    $loc = $situation->situationRecord->groupOfLocations->locationForDisplay ?? null;
-    $validityNode = $situation->situationRecord->validity->validityTimeSpecification ?? null;
+    $startDt = parse_overall_start_time($situation);
+    if ($startDt === null) continue;
 
-    if (!$loc || !$validityNode) continue;
+    $toekomst = (clone $startDt)->modify("+2 hours");
+    if ($toekomst <= $now) continue;
 
-    $latRaw = safe_get_string($loc->latitude);
-    $lonRaw = safe_get_string($loc->longitude);
-    $startRaw = safe_get_string($validityNode->overallStartTime);
-
-    if ($latRaw === '' || $lonRaw === '' || $startRaw === '') continue;
-
-    if (!is_numeric((string)$latRaw) || !is_numeric((string)$lonRaw)) continue;
-
-    $lat = round((float)$latRaw, 5);
-    $lon = round((float)$lonRaw, 5);
-    $key = $lat . '_' . $lon;
-
-    // Parse start time veilig
-    try {
-        $startDt = new DateTime($startRaw);
-    } catch (Exception $e) {
+    if (!isset($situationMap[$ndwIdentifier])) {
+        $situationMap[$ndwIdentifier] = $situation;
         continue;
     }
 
-    $toekomst = (clone $startDt)->modify("+2 hours");
-    if ($toekomst > $now) {
-        // bewaar situatie
-        if (!isset($situationMap[$key])) $situationMap[$key] = [];
-        $situationMap[$key][] = $situation;
-    }
+    $situationMap[$ndwIdentifier] = select_closest_situation($situationMap[$ndwIdentifier], $situation, $now);
 }
 
-// ---------- Verwerk elke brug: 1 lookup op key, kies dichtsbijzijnde starttime ----------
+// ---------- Verwerk elke brug: lookup op NDW ID ----------
 $dataArray = [];
 
 foreach ($bruggen as $brug) {
 
-    $lat = round((float)$brug['latitude'], 5);
-    $lon = round((float)$brug['longitude'], 5);
-    $key = $lat . '_' . $lon;
-
     $found = null;
+    $ndwIdentifier = safe_get_string($brug['ndwID'] ?? '');
 
-    if (isset($situationMap[$key])) {
-        // kies situatie waarvan overallStartTime het dichtst bij nu ligt
-        foreach ($situationMap[$key] as $situation) {
-
-            $startRaw = safe_get_string($situation->situationRecord->validity->validityTimeSpecification->overallStartTime);
-            if ($startRaw === '') continue;
-
-            try {
-                $dt = new DateTime($startRaw);
-            } catch (Exception $e) {
-                continue;
-            }
-
-            if ($found === null) {
-                $found = $situation;
-                $foundTs = $dt->getTimestamp();
-            } else {
-                $foundStartRaw = safe_get_string($found->situationRecord->validity->validityTimeSpecification->overallStartTime);
-                try {
-                    $foundDt = new DateTime($foundStartRaw);
-                } catch (Exception $e) {
-                    // behoud huidige found als fallback
-                    continue;
-                }
-
-                $diff1 = abs($now->getTimestamp() - $dt->getTimestamp());
-                $diff2 = abs($now->getTimestamp() - $foundDt->getTimestamp());
-
-                if ($diff1 < $diff2) {
-                    $found = $situation;
-                }
-            }
-        }
+    if ($ndwIdentifier !== '' && isset($situationMap[$ndwIdentifier])) {
+        $found = $situationMap[$ndwIdentifier];
+    } elseif ($ndwIdentifier !== '') {
+        remember_missing_ndw($missingNdwLog, $ndwIdentifier, $brug);
     }
 
     // Vul het output-object (zelfde velden als jouw oude script, maar robuust)
@@ -267,6 +310,9 @@ foreach ($bruggen as $brug) {
         ]
     ];
 }
+
+// ---------- Bewaar ontbrekende NDW ID's ----------
+save_missing_ndw_log($missingNdwFile, $missingNdwLog);
 
 // ---------- Sla output op ----------
 file_put_contents($jsonOutputFile, json_encode($dataArray, JSON_PRETTY_PRINT));
