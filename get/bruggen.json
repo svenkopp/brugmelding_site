@@ -762,7 +762,7 @@
     "naam": "Rhijnvreugdbrug",
     "stad": "Leiderdorp",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLZOU002060527800490"
+    "ndwID": "NLZOU002060527800491"
   },
   {
     "id": "218",
@@ -888,7 +888,7 @@
     "naam": "Calandbrug",
     "stad": "Botlek",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLRTM001160350300018"
+    "ndwID": "NLRTM001164917000018"
   },
   {
     "id": "235",
@@ -1572,7 +1572,7 @@
     "naam": "Donksebrug",
     "stad": "Beek en Donk",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLBEE001210400800926"
   },
   {
     "id": "318",
@@ -1608,7 +1608,7 @@
     "naam": "Brug Bosscheweg",
     "stad": "Tilburg",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLTLB001240583400298"
   },
   {
     "id": "322",
@@ -1887,7 +1887,7 @@
     "naam": "Waardbrug",
     "stad": "Kolhorn",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLANP002450516300181"
   },
   {
     "id": "355",
@@ -1905,7 +1905,7 @@
     "naam": "Mastenbroekerbrug",
     "stad": "Zwolle",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLZWO000860498400042"
   },
   {
     "id": "357",
@@ -1914,7 +1914,7 @@
     "naam": "Twistvlietbrug",
     "stad": "Zwolle",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLZWO000864362900031"
   },
   {
     "id": "358",
@@ -2259,15 +2259,6 @@
     "ndwID": "n"
   },
   {
-    "id": "587",
-    "latitude": "53.277184",
-    "longitude": "6.75718",
-    "naam": "Bloemhofbrug",
-    "stad": "Overschild",
-    "provincie": "Groningen",
-    "ndwID": "n"
-  },
-  {
     "id": "588",
     "latitude": "52.953754",
     "longitude": "4.777927",
@@ -2364,7 +2355,7 @@
     "naam": "Postbrug",
     "stad": "Yerseke",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLKPL001370519200038"
   },
   {
     "id": "600",
@@ -2535,7 +2526,7 @@
     "naam": "Slauerhoffbrug",
     "stad": "Leeuwarden",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLLWR000275288400440"
   },
   {
     "id": "621",
@@ -2652,7 +2643,7 @@
     "naam": "Stadsbrug",
     "stad": "Dordrecht",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLZWI001110572200019"
   },
   {
     "id": "634",
@@ -2679,7 +2670,7 @@
     "naam": "Keersluisbrug",
     "stad": "Vlissingen",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLVLI001340492200027"
   },
   {
     "id": "637",
@@ -2976,7 +2967,7 @@
     "naam": "Algerabrug",
     "stad": "Krimpen aan den IJssel",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLCPI0211D0518200003"
   },
   {
     "id": "670",
@@ -3183,7 +3174,7 @@
     "naam": "Bloemhofbrug",
     "stad": "Overschild",
     "provincie": "Groningen",
-    "ndwID": ""
+    "ndwID": "NLOSK000600352900141"
   },
   {
     "id": "704",
@@ -3237,7 +3228,7 @@
     "naam": "Meerbrug",
     "stad": "Nieuwe wetering",
     "provincie": "Noord-Holland",
-    "ndwID": ""
+    "ndwID": "NLABE002010537100018"
   },
   {
     "id": "1145",
@@ -3346,5 +3337,50 @@
     "stad": "Alphen aan den Rijn",
     "provincie": "Zuid-Holland",
     "ndwID": "NLAPN002062253700374"
+  },
+  {
+    "id": "1199",
+    "latitude": "52.1348208761",
+    "longitude": "4.6630636396",
+    "naam": "Sloebrug",
+    "stad": "Vlissingen",
+    "provincie": "Zeeland",
+    "ndwID": "NLVLI001340492400037"
+  },
+  {
+    "id": "1200",
+    "latitude": 52.6633027184829,
+    "longitude": 6.10068249563837,
+    "naam": "Beukersgrachtbrug",
+    "stad": "Wanneperveen",
+    "provincie": "Overijssel",
+    "ndwID": "NLZWS000890315000001"
+  },
+  {
+    "id": "1201",
+    "latitude": 52.1903537852533,
+    "longitude": 4.42962661321816,
+    "naam": "Sandtlaanbrug",
+    "stad": "Katwijk",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLZWS000890315000001"
+  },
+  {
+    "id": "1202",
+    "latitude": 51.8310920504257,
+    "longitude": 4.96783770560788,
+    "naam": "Grote Merwedesluis",
+    "stad": "Gorinchem",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLZWS000890315000001"
+  },
+  {
+    "id": "1203",
+    "latitude": 51.9493148264553,
+    "longitude": 5.05071482519873,
+    "naam": "Zwaanskuikenbrug",
+    "stad": "Lexmond",
+    "provincie": "Utrecht",
+    "ndwID": "NLZWS000890315000001"
   }
 ]
