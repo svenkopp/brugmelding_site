@@ -91,12 +91,12 @@
   },
   {
     "id": "143",
-    "latitude": "53.22592",
-    "longitude": "6.5938864",
+    "latitude": "53.2259208",
+    "longitude": "6.5938866",
     "naam": "Oostersluisbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "NLGRQ000030502500005"
+    "ndwID": "NLGRQ000600502500270"
   },
   {
     "id": "144",
@@ -559,12 +559,12 @@
   },
   {
     "id": "195",
-    "latitude": "53.214214",
-    "longitude": "6.599602",
+    "latitude": "53.2142142496",
+    "longitude": "6.5996021032",
     "naam": "Lage Euvelgunnerbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "NLGRQ000130331300009"
+    "ndwID": "NLGRQ000130331500009"
   },
   {
     "id": "196",
@@ -883,12 +883,12 @@
   },
   {
     "id": "234",
-    "latitude": "51.90130349255608",
-    "longitude": "4.227515794336796",
+    "latitude": "51.901276",
+    "longitude": "4.2269144",
     "naam": "Calandbrug",
     "stad": "Botlek",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLRTM001164917000018"
+    "ndwID": "NLRTM001160350300018"
   },
   {
     "id": "235",
@@ -1234,21 +1234,21 @@
   },
   {
     "id": "277",
-    "latitude": "52.413273",
-    "longitude": "4.681905",
+    "latitude": "52.4132740506",
+    "longitude": "4.68190463",
     "naam": "Rijnlandsbrug",
     "stad": "Spaarndam",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLSPD002020468900036"
   },
   {
     "id": "278",
-    "latitude": "52.633614",
-    "longitude": "4.750031",
+    "latitude": "52.6336154218",
+    "longitude": "4.7500312328",
     "naam": "Ringersbrug",
     "stad": "Alkmaar",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLALK002340558400407"
   },
   {
     "id": "279",
@@ -1270,12 +1270,12 @@
   },
   {
     "id": "281",
-    "latitude": "52.47147",
-    "longitude": "4.8134274",
+    "latitude": "52.471471341",
+    "longitude": "4.8134273113",
     "naam": "Julianabrug",
     "stad": "Zaandijk",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLZAD002360564800068"
   },
   {
     "id": "282",
@@ -1288,12 +1288,12 @@
   },
   {
     "id": "283",
-    "latitude": "52.42779",
-    "longitude": "4.834402",
+    "latitude": "52.4277921936",
+    "longitude": "4.8344022041",
     "naam": "Dr. J.M. Den Uylbrug",
     "stad": "Zaandam",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLZAA002360561800012"
   },
   {
     "id": "284",
@@ -1306,30 +1306,30 @@
   },
   {
     "id": "285",
-    "latitude": "51.93415",
-    "longitude": "4.4216075",
+    "latitude": "51.934151855",
+    "longitude": "4.4216073188",
     "naam": "Spaansebrug",
     "stad": "Rotterdam",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLRTM002012254700473"
   },
   {
     "id": "286",
-    "latitude": "52.378193",
-    "longitude": "4.9666243",
+    "latitude": "52.378191826",
+    "longitude": "4.9666240487",
     "naam": "Schellingwouderbrug",
     "stad": "Amsterdam",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLAMS002330568300271"
   },
   {
     "id": "288",
-    "latitude": "52.59183",
-    "longitude": "6.0851145",
+    "latitude": "52.5918328626",
+    "longitude": "6.0851143174",
     "naam": "N331 Hasselt",
     "stad": "Hasselt",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLHAS000860498700116"
   },
   {
     "id": "289",
@@ -1351,12 +1351,12 @@
   },
   {
     "id": "291",
-    "latitude": "52.69224",
-    "longitude": "6.0748615",
+    "latitude": "52.6922429471",
+    "longitude": "6.0748617059",
     "naam": "Blauwe hand",
     "stad": "Wanneperveen",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLZWS000890315200039"
   },
   {
     "id": "292",
@@ -1495,12 +1495,12 @@
   },
   {
     "id": "309",
-    "latitude": "52.244984",
-    "longitude": "6.168148",
+    "latitude": "52.2449830668",
+    "longitude": "6.1681479472",
     "naam": "Prins Bernhardbrug West",
     "stad": "Deventer",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLDEV0084B0373600003"
   },
   {
     "id": "310",
@@ -1612,12 +1612,12 @@
   },
   {
     "id": "322",
-    "latitude": "51.578854",
-    "longitude": "5.064058",
+    "latitude": "51.5788698172",
+    "longitude": "5.0641265791",
     "naam": "Brug Kraaivenstraat",
     "stad": "Tilburg",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLTLB001242255300259"
   },
   {
     "id": "323",
@@ -1648,12 +1648,12 @@
   },
   {
     "id": "326",
-    "latitude": "52.88651",
-    "longitude": "4.8737264",
+    "latitude": "52.8865100888",
+    "longitude": "4.8737263205",
     "naam": "Balgzandbrug",
     "stad": "Anna Paulowna",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLANP002450515300061"
   },
   {
     "id": "327",
@@ -1675,12 +1675,12 @@
   },
   {
     "id": "329",
-    "latitude": "52.142963",
-    "longitude": "4.647203",
+    "latitude": "52.1429652381",
+    "longitude": "4.6472029202",
     "naam": "Molenaarsbrug",
     "stad": "Alphen aan den Rijn",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLAPN002122253200371"
   },
   {
     "id": "330",
@@ -1738,12 +1738,12 @@
   },
   {
     "id": "337",
-    "latitude": "52.462936",
-    "longitude": "4.812556",
+    "latitude": "52.462937816",
+    "longitude": "4.8125559124",
     "naam": "Coenbrug",
     "stad": "Koog aan de Zaan",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLKGZ002360564300056"
   },
   {
     "id": "339",
@@ -1756,12 +1756,12 @@
   },
   {
     "id": "340",
-    "latitude": "52.912933",
-    "longitude": "4.7950745",
+    "latitude": "52.912934812",
+    "longitude": "4.7950742461",
     "naam": "Kooybrug",
     "stad": "Den Helder",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLDHR002340561500755"
   },
   {
     "id": "341",
@@ -1792,12 +1792,12 @@
   },
   {
     "id": "344",
-    "latitude": "52.63578",
-    "longitude": "4.7473435",
+    "latitude": "52.6357820696",
+    "longitude": "4.7473436594",
     "naam": "Tesselsebrug",
     "stad": "Alkmaar",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLALK002340558600412"
   },
   {
     "id": "345",
@@ -1810,12 +1810,12 @@
   },
   {
     "id": "346",
-    "latitude": "52.42013",
-    "longitude": "4.693416",
+    "latitude": "52.4201314659",
+    "longitude": "4.6934160788",
     "naam": "Spaarndam (A9)",
     "stad": "Spaarndam",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLSPD002020468600025"
   },
   {
     "id": "347",
@@ -1855,12 +1855,12 @@
   },
   {
     "id": "351",
-    "latitude": "52.4402",
-    "longitude": "4.8249164",
+    "latitude": "52.440202067",
+    "longitude": "4.8249163786",
     "naam": "Gedempte Gracht",
     "stad": "Zaandam",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLZAA002360562400027"
   },
   {
     "id": "352",
@@ -1918,12 +1918,12 @@
   },
   {
     "id": "358",
-    "latitude": "52.61654",
-    "longitude": "4.768056",
+    "latitude": "52.6165371506",
+    "longitude": "4.7680556774",
     "naam": "Leeghwaterbrug",
     "stad": "Alkmaar",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLALK002340557700383"
   },
   {
     "id": "359",
@@ -1936,21 +1936,21 @@
   },
   {
     "id": "362",
-    "latitude": "52.455",
-    "longitude": "4.812717",
+    "latitude": "52.4550565667",
+    "longitude": "4.8126657494",
     "naam": "Spoorbrug",
     "stad": "Zaandam",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLZAA002360563100047"
   },
   {
     "id": "363",
-    "latitude": "52.337193",
-    "longitude": "4.8470116",
+    "latitude": "52.337191492",
+    "longitude": "4.8470117032",
     "naam": "Schinkelbrug",
     "stad": "Amsterdam",
     "provincie": "Noord-Holland",
-    "ndwID": "NDW04_NLAMS002122253000074_11973063_01"
+    "ndwID": "NLAMS002122253000074"
   },
   {
     "id": "364",
@@ -2314,12 +2314,12 @@
   },
   {
     "id": "593",
-    "latitude": "52.93417",
-    "longitude": "5.0421133",
+    "latitude": "52.9341713448",
+    "longitude": "5.0421134615",
     "naam": "Stevinsluizen",
     "stad": "Den Oever",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLWRG003020404400327"
   },
   {
     "id": "594",
@@ -2332,12 +2332,12 @@
   },
   {
     "id": "595",
-    "latitude": "53.255245",
-    "longitude": "6.3997684",
+    "latitude": "53.2552467119",
+    "longitude": "6.3997683759",
     "naam": "Brug Zuidhorn",
     "stad": "Zuidhorn",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000600504200411"
   },
   {
     "id": "596",
@@ -2350,12 +2350,12 @@
   },
   {
     "id": "597",
-    "latitude": "53.30627",
-    "longitude": "6.8546352",
+    "latitude": "53.3062698",
+    "longitude": "6.8546354",
     "naam": "Woldbrug",
     "stad": "Appingedam",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLAPP000600353100068"
   },
   {
     "id": "598",
@@ -2368,21 +2368,21 @@
   },
   {
     "id": "600",
-    "latitude": "51.229412",
-    "longitude": "3.8075185",
+    "latitude": "51.2294121521",
+    "longitude": "3.807518369",
     "naam": "Sas van Gent brug",
     "stad": "Sas van Gent",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLSVG001300521600186"
   },
   {
     "id": "601",
-    "latitude": "53.200703",
-    "longitude": "6.0687213",
+    "latitude": "53.2007025",
+    "longitude": "6.0687214",
     "naam": "Skulenboarch",
     "stad": "Eastermar",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLOME000600355000649"
   },
   {
     "id": "602",
@@ -2404,12 +2404,12 @@
   },
   {
     "id": "604",
-    "latitude": "53.23716",
-    "longitude": "6.2125783",
+    "latitude": "53.2371586238",
+    "longitude": "6.2125780846",
     "naam": "Brug Stroobos",
     "stad": "Stroobos",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLKLM000600354200539"
   },
   {
     "id": "605",
@@ -2422,12 +2422,12 @@
   },
   {
     "id": "607",
-    "latitude": "53.168587",
-    "longitude": "6.7430167",
+    "latitude": "53.1685860927",
+    "longitude": "6.7430166813",
     "naam": "Zwedenwegbrug",
     "stad": "Hoogezand",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLHZD000130332700122"
   },
   {
     "id": "608",
@@ -2638,12 +2638,12 @@
   },
   {
     "id": "632",
-    "latitude": "53.21963",
-    "longitude": "6.59714",
+    "latitude": "53.2196322052",
+    "longitude": "6.5971398354",
     "naam": "Sontbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000130123300004"
   },
   {
     "id": "633",
@@ -2791,12 +2791,12 @@
   },
   {
     "id": "649",
-    "latitude": "51.704113",
-    "longitude": "5.2808385",
+    "latitude": "51.7041123769",
+    "longitude": "5.2808382825",
     "naam": "Industriehavenbrug ",
     "stad": "Den Bosch",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLHTB008464209300004"
   },
   {
     "id": "650",
@@ -3133,12 +3133,12 @@
   },
   {
     "id": "691",
-    "latitude": "53.227646",
-    "longitude": "6.5917773",
+    "latitude": "53.2276455",
+    "longitude": "6.5917772",
     "naam": "Nieuwe Oostersluis",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000600502900272"
   },
   {
     "id": "692",
@@ -3214,12 +3214,12 @@
   },
   {
     "id": "753",
-    "latitude": "52.0009607735451",
-    "longitude": "4.69341392066174",
+    "latitude": "52.0009607735",
+    "longitude": "4.6934139207",
     "naam": "Julianasluisbrug Zuid",
     "stad": "Gouda",
     "provincie": "",
-    "ndwID": ""
+    "ndwID": "NLGOU002700536600143"
   },
   {
     "id": "1007",
@@ -3286,12 +3286,12 @@
   },
   {
     "id": "1192",
-    "latitude": "51.3296980481973",
-    "longitude": "3.81604968056394",
+    "latitude": "51.3296980482",
+    "longitude": "3.8160496806",
     "naam": "Westsluis noord",
     "stad": "Terneuzen",
     "provincie": "Zeeland",
-    "ndwID": ""
+    "ndwID": "NLTNZ001300522600307"
   },
   {
     "id": "1193",
@@ -3310,5 +3310,41 @@
     "stad": "Terneuzen",
     "provincie": "Zeeland",
     "ndwID": ""
+  },
+  {
+    "id": "1195",
+    "latitude": "52.9344758054",
+    "longitude": "5.0416661385",
+    "naam": "Brug Afsluitdijk Buitenhoofd",
+    "stad": "Den Oever",
+    "provincie": "Noord-Holland",
+    "ndwID": "NLWRG003020404700328"
+  },
+  {
+    "id": "1196",
+    "latitude": "52.1256306352",
+    "longitude": "4.6627903969",
+    "naam": "Swaenswijkbrug",
+    "stad": "Alphen aan den Rijn",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLAPN002062254200366"
+  },
+  {
+    "id": "1197",
+    "latitude": "51.8681696523",
+    "longitude": "4.9988304518",
+    "naam": "Schotdeurensebrug",
+    "stad": "Arkel",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLARK0105B0426000008"
+  },
+  {
+    "id": "1198",
+    "latitude": "52.1348208761",
+    "longitude": "4.6630636396",
+    "naam": "Koningin Julianabrug",
+    "stad": "Alphen aan den Rijn",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLAPN002062253700374"
   }
 ]
