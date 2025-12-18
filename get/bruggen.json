@@ -555,7 +555,7 @@
     "naam": "Dr. Albert Schweitzerbrug",
     "stad": "Alphen aan den Rijn",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLAPN002062253400384"
+    "ndwID": "NLAPN002064916600385"
   },
   {
     "id": "195",
@@ -1338,7 +1338,7 @@
     "naam": "Kandelaarbrug",
     "stad": "Schipluiden",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLPIJ002010543400430"
   },
   {
     "id": "290",
@@ -1536,7 +1536,7 @@
     "naam": "Amertakbrug",
     "stad": "Geertruidenberg",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLDRM001240582400018"
   },
   {
     "id": "314",
@@ -1554,16 +1554,16 @@
     "naam": "Sluis Sint Andries",
     "stad": "Heerewaarden",
     "provincie": "Gelderland",
-    "ndwID": "n"
+    "ndwID": "NLHRW0101A0552600013"
   },
   {
     "id": "316",
     "latitude": "51.648235",
     "longitude": "4.83332",
-    "naam": "Vrachelse Brug",
+    "naam": "Vrachelsebrug",
     "stad": "Oosterhout",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLOOS001250430400005"
   },
   {
     "id": "317",
@@ -1632,10 +1632,10 @@
     "id": "324",
     "latitude": "51.505257",
     "longitude": "5.492331",
-    "naam": "Sonse brug",
+    "naam": "Hefbrug Son",
     "stad": "Son",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLSON001240585500606"
   },
   {
     "id": "325",
@@ -1666,12 +1666,12 @@
   },
   {
     "id": "328",
-    "latitude": "52.025887",
-    "longitude": "4.666421",
+    "latitude": "52.0258620128157",
+    "longitude": "4.66643750667572",
     "naam": "Amaliabrug",
     "stad": "Waddinxveen",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLGOU002700862600107"
   },
   {
     "id": "329",
@@ -2247,7 +2247,7 @@
     "naam": "Haagse Schouwbrug",
     "stad": "Leiden",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLLID002050421000033"
   },
   {
     "id": "586",
@@ -2292,7 +2292,7 @@
     "naam": "Borgbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGWO000600352700237"
   },
   {
     "id": "592",
@@ -2301,7 +2301,7 @@
     "naam": "Brug Gaarkeukensluis",
     "stad": "Grijpskerk",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGKN000600504400471"
   },
   {
     "id": "593",
@@ -2337,7 +2337,7 @@
     "naam": "Zeesluis Delfzijl",
     "stad": "Farmsum",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLFAR000600353600007"
   },
   {
     "id": "597",
@@ -2436,7 +2436,7 @@
     "naam": "Aduard Brug",
     "stad": "Aduard",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000601013900364"
   },
   {
     "id": "610",
@@ -2532,10 +2532,10 @@
     "id": "621",
     "latitude": "52.002285",
     "longitude": "4.693787",
-    "naam": "Julianasluisbrug",
+    "naam": "Julianasluisbrug Noord",
     "stad": "Gouda",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLGOU002700536400142"
   },
   {
     "id": "622",
@@ -2544,7 +2544,7 @@
     "naam": "Waterhuizerbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000130332100057"
   },
   {
     "id": "623",
@@ -3252,10 +3252,10 @@
     "id": "1147",
     "latitude": "52.8020289674463",
     "longitude": "4.99840701425065",
-    "naam": "Alkmaarse brug",
+    "naam": "Alkmaarsebrug",
     "stad": "Middenmeer",
     "provincie": "Noord-Holland",
-    "ndwID": ""
+    "ndwID": "NLWIW002440514100195"
   },
   {
     "id": "1184",
@@ -3300,7 +3300,7 @@
     "naam": "Westsluis zuid",
     "stad": "Terneuzen",
     "provincie": "Zeeland",
-    "ndwID": ""
+    "ndwID": "NLTNZ001300522400303"
   },
   {
     "id": "1195",
@@ -3363,7 +3363,7 @@
     "naam": "Sandtlaanbrug",
     "stad": "Katwijk",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLZWS000890315000001"
+    "ndwID": "NLRBG002050421900078"
   },
   {
     "id": "1202",
@@ -3382,5 +3382,32 @@
     "stad": "Lexmond",
     "provincie": "Utrecht",
     "ndwID": "NLZWS000890315000001"
+  },
+  {
+    "id": "1204",
+    "naam": "Zwaanskuikenbrug",
+    "stad": "Alphen aan den Rijn",
+    "provincie": "Zuid-Holland",
+    "latitude": 52.1288147897445,
+    "longitude": 4.66275118888742,
+    "ndwID": "NLAPN002062254000366",
+  },
+  {
+    "id": "1205",
+    "latitude": 52.1778487609996,
+    "longitude": 4.44742977619171,
+    "naam": "Joop van der Reijdenbrug",
+    "stad": "Valkenburg",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLRBG002054318300055"
+  },
+  {
+    "id": "1206",
+    "latitude": 51.9953249451086,
+    "longitude": 5.09745710295874,
+    "naam": "Hoge brug over de Grote Sluis Vianen",
+    "stad": "Vianen",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLRBG002054318300055"
   }
 ]
