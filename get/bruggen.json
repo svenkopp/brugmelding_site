@@ -1302,7 +1302,7 @@
     "naam": "Sint-Sebastiaansbrug",
     "stad": "Delft",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLDFT002010542300375"
   },
   {
     "id": "285",
@@ -1374,7 +1374,7 @@
     "naam": "Buitenhuizerbrug",
     "stad": "Velsen",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLSPD002020468300003"
   },
   {
     "id": "295",
@@ -1383,7 +1383,7 @@
     "naam": "Van Brienenoordbrug",
     "stad": "Rotterdam",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLRTM001020374200058"
   },
   {
     "id": "296",
@@ -1419,7 +1419,7 @@
     "naam": "Eilandbrug",
     "stad": "Kampen",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLKAM000844351501128"
   },
   {
     "id": "300",
@@ -1509,7 +1509,7 @@
     "naam": "Prins Bernhardbrug Oost",
     "stad": "Deventer",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLDEV0084B0373800004"
   },
   {
     "id": "311",
@@ -1518,7 +1518,7 @@
     "naam": "Brug Hanzeweg",
     "stad": "Deventer",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLDEV0084B0374000007"
   },
   {
     "id": "312",
@@ -1527,7 +1527,7 @@
     "naam": "Wilhelminabrug",
     "stad": "Oosterhout",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLOOS001242255100081"
   },
   {
     "id": "313",
@@ -1581,7 +1581,7 @@
     "naam": "Beeksebrug",
     "stad": "Beek en Donk",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLBEE001210401000912"
   },
   {
     "id": "319",
@@ -1590,7 +1590,7 @@
     "naam": "Brug Oranjelaan",
     "stad": "Beek en Donk",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLARI001240586300710"
   },
   {
     "id": "320",
@@ -1644,7 +1644,7 @@
     "naam": "De Twee Zwanen Brug",
     "stad": "Schagen",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLSBU002440513400002"
   },
   {
     "id": "326",
@@ -1662,7 +1662,7 @@
     "naam": "Woubrugsebrug",
     "stad": "Woubrugge",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLAPN002120534200346"
   },
   {
     "id": "328",
@@ -1689,7 +1689,7 @@
     "naam": "Hoflandbrug",
     "stad": "Voorschoten",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLLID002050419500015"
   },
   {
     "id": "331",
@@ -1698,7 +1698,7 @@
     "naam": "Kanaalbrug",
     "stad": "Leiden",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLLID002010538300164"
   },
   {
     "id": "332",
@@ -1734,7 +1734,7 @@
     "naam": "Eelwerderbrug",
     "stad": "Appingedam",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLFAR000600353300047"
   },
   {
     "id": "337",
@@ -1752,7 +1752,7 @@
     "naam": "Kruithuisbrug",
     "stad": "Delft",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLDFT002010543100397"
   },
   {
     "id": "340",
@@ -1896,7 +1896,7 @@
     "naam": "Kloosterbrug",
     "stad": "Winschoten",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLWSC000130334400319"
   },
   {
     "id": "356",
@@ -1986,7 +1986,7 @@
     "naam": "Geestbrug",
     "stad": "Rijswijk",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLVOB0201L0464400004"
   },
   {
     "id": "368",
@@ -1995,7 +1995,7 @@
     "naam": "Noordbroeksterbrug",
     "stad": "Sappemeer",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLSAP000130333400167"
   },
   {
     "id": "557",
@@ -2094,7 +2094,7 @@
     "naam": "Beemsterbrug",
     "stad": "Purmerend",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLPUM002410384900295"
   },
   {
     "id": "568",
@@ -2121,7 +2121,7 @@
     "naam": "Zijperbrug",
     "stad": "Schagerbrug",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLSBU002440513700021"
   },
   {
     "id": "571",
@@ -2139,7 +2139,7 @@
     "naam": "Stadsbrug",
     "stad": "Kampen",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLKAM000840437101079"
   },
   {
     "id": "573",
@@ -2229,7 +2229,7 @@
     "naam": "Nieuwe Tolbrug",
     "stad": "Den Haag",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLVOB002010540800310"
   },
   {
     "id": "584",
@@ -2256,7 +2256,7 @@
     "naam": "Vlakebrug",
     "stad": "Hansweert",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLHAN001370519800070"
   },
   {
     "id": "588",
@@ -2265,7 +2265,7 @@
     "naam": "Van Kinsbergenbrug",
     "stad": "Den Helder",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLDHR0234C0384300006"
   },
   {
     "id": "589",
@@ -2382,7 +2382,7 @@
     "naam": "Vreelandbrug",
     "stad": "Vreeland",
     "provincie": "Utrecht",
-    "ndwID": "n"
+    "ndwID": "NLVRD002270446700216"
   },
   {
     "id": "603",
@@ -2409,7 +2409,7 @@
     "naam": "Lorentzsluizen zuid",
     "stad": "Kornwerderzand",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLKWZ003010403800552"
   },
   {
     "id": "607",
@@ -2427,7 +2427,7 @@
     "naam": "Koningsbrug",
     "stad": "Harlingen",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLHAR000220358500022"
   },
   {
     "id": "609",
@@ -2445,7 +2445,7 @@
     "naam": "Westerbroeksterbrug",
     "stad": "Westerbroek",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLFOX000130332300077"
   },
   {
     "id": "611",
@@ -2454,7 +2454,7 @@
     "naam": "Eembrug",
     "stad": "Baarn",
     "provincie": "Utrecht",
-    "ndwID": "n"
+    "ndwID": "NLEES002280429600113"
   },
   {
     "id": "612",
@@ -2472,7 +2472,7 @@
     "naam": "Slochterbrug",
     "stad": "Zuidbroek",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLSAP000130333200154"
   },
   {
     "id": "615",
@@ -2481,7 +2481,7 @@
     "naam": "Houtribsluizen",
     "stad": "Lelystad",
     "provincie": "Flevoland",
-    "ndwID": "n"
+    "ndwID": "NLLEY002300441100341"
   },
   {
     "id": "616",
@@ -2517,7 +2517,7 @@
     "naam": "Brug Robbengatsluis",
     "stad": "Lauwersoog",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLLAN000060349200508"
   },
   {
     "id": "620",
@@ -2553,7 +2553,7 @@
     "naam": "Wiersebrug",
     "stad": "Nieuwegein",
     "provincie": "Utrecht",
-    "ndwID": "n"
+    "ndwID": "NLNWG002260443400105"
   },
   {
     "id": "624",
@@ -2562,7 +2562,7 @@
     "naam": "Vollenhoverbrug",
     "stad": "Marknesse",
     "provincie": "Flevoland",
-    "ndwID": "n"
+    "ndwID": "NLMAN000930403600072"
   },
   {
     "id": "625",
@@ -2571,7 +2571,7 @@
     "naam": "Zuidbroeksterbrug",
     "stad": "Zuidbroek",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLZBO000130333600204"
   },
   {
     "id": "626",
@@ -2580,7 +2580,7 @@
     "naam": "Verlaatsbrug",
     "stad": "Leeuwarden",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLLWR000270322300426"
   },
   {
     "id": "627",
@@ -2589,7 +2589,7 @@
     "naam": "Spannenburgerbrug",
     "stad": "Tjerkgaast",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLLMR000600356801106"
   },
   {
     "id": "628",
@@ -2607,7 +2607,7 @@
     "naam": "Vrouwenpoortsbrug",
     "stad": "Leeuwarden",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLLWR000270322100420"
   },
   {
     "id": "630",
@@ -2616,7 +2616,7 @@
     "naam": "Noorderbrug",
     "stad": "Leeuwarden",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLLWR000270321900411"
   },
   {
     "id": "631",
@@ -2625,7 +2625,7 @@
     "naam": "Meedenerbrug",
     "stad": "Muntendam",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLVDM000180311000033"
   },
   {
     "id": "632",
@@ -2679,7 +2679,7 @@
     "naam": "Binkhorstbrug",
     "stad": "Den Haag",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLHAG201L10464900002"
   },
   {
     "id": "638",
@@ -2688,7 +2688,7 @@
     "naam": "Krammersluizen",
     "stad": "Bruinisse",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLPLP001430523200223"
   },
   {
     "id": "639",
@@ -2697,7 +2697,7 @@
     "naam": "Blauwe Brug",
     "stad": "Nieuwegein",
     "provincie": "Utrecht",
-    "ndwID": "n"
+    "ndwID": "NLNWG002260442800073"
   },
   {
     "id": "640",
@@ -2733,7 +2733,7 @@
     "naam": "Elburgerbrug",
     "stad": "Elburg",
     "provincie": "Flevoland",
-    "ndwID": "n"
+    "ndwID": "NLELB002290432400606"
   },
   {
     "id": "644",
@@ -2760,7 +2760,7 @@
     "naam": "Pleiadenbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000060347100055"
   },
   {
     "id": "647",
@@ -2769,7 +2769,7 @@
     "naam": "Aldskou Brug",
     "stad": "Akkrum",
     "provincie": "Friesland",
-    "ndwID": "n"
+    "ndwID": "NLOHW000600356200898"
   },
   {
     "id": "648",
@@ -2778,7 +2778,7 @@
     "naam": "Bergse Diepsluis",
     "stad": "Tholen",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLTHO001830574100025"
   },
   {
     "id": "649",
@@ -2796,7 +2796,7 @@
     "naam": "Doorslagbrug",
     "stad": "Nieuwegein",
     "provincie": "Utrecht",
-    "ndwID": "n"
+    "ndwID": "NLNWG0226B0476100006"
   },
   {
     "id": "651",
@@ -2823,7 +2823,7 @@
     "naam": "Eexterbrug",
     "stad": "Scheemda",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLSMD000130334000281"
   },
   {
     "id": "654",
@@ -2832,7 +2832,7 @@
     "naam": "Ketelbrug",
     "stad": "Swifterbant",
     "provincie": "Flevoland",
-    "ndwID": "n"
+    "ndwID": "NLSWI000842251301280"
   },
   {
     "id": "655",
@@ -2841,7 +2841,7 @@
     "naam": "Industriehaven ",
     "stad": "Helmond",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLHLM008520403200006"
   },
   {
     "id": "656",
@@ -2850,7 +2850,7 @@
     "naam": "Graaf Adolfbrug",
     "stad": "Scheemda",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLSMD000130334200301"
   },
   {
     "id": "657",
@@ -2877,7 +2877,7 @@
     "naam": "Ramspolbrug",
     "stad": "Ens",
     "provincie": "Flevoland",
-    "ndwID": "n"
+    "ndwID": "NLRPL000860499000346"
   },
   {
     "id": "660",
@@ -2895,7 +2895,7 @@
     "naam": "Nijkerkersluis",
     "stad": "Nijkerk",
     "provincie": "Gelderland",
-    "ndwID": "n"
+    "ndwID": "NLNKK002290431800258"
   },
   {
     "id": "662",
@@ -2922,7 +2922,7 @@
     "naam": "Sluis Helmond",
     "stad": "Helmond",
     "provincie": "Noord-Brabant",
-    "ndwID": "n"
+    "ndwID": "NLHLM0121A0403000033"
   },
   {
     "id": "665",
@@ -2940,7 +2940,7 @@
     "naam": "Trekvlietbrug",
     "stad": "Den Haag",
     "provincie": "Zuid-Holland",
-    "ndwID": "n"
+    "ndwID": "NLHAG0201L0464600017"
   },
   {
     "id": "667",
@@ -3084,7 +3084,7 @@
     "naam": "Tafelbrug",
     "stad": "Dorkwerd",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000600503800343"
   },
   {
     "id": "684",
@@ -3111,7 +3111,7 @@
     "naam": "Victoriebrug",
     "stad": "Alkmaar",
     "provincie": "Noord-Holland",
-    "ndwID": "n"
+    "ndwID": "NLALK002346696900415"
   },
   {
     "id": "690",
@@ -3201,7 +3201,7 @@
     "naam": "Lorentzsluizen noord",
     "stad": "Kornwerderzand",
     "provincie": "Friesland",
-    "ndwID": ""
+    "ndwID": "NLKWZ003010404100552"
   },
   {
     "id": "753",
@@ -3390,7 +3390,7 @@
     "provincie": "Zuid-Holland",
     "latitude": 52.1288147897445,
     "longitude": 4.66275118888742,
-    "ndwID": "NLAPN002062254000366",
+    "ndwID": "NLAPN002062254000366"
   },
   {
     "id": "1205",
