@@ -20,6 +20,30 @@ function safe_get_string($var) {
     return isset($var) ? (string)$var : '';
 }
 
+/**
+ * Zorgt ervoor dat ndwID zowel als string als array kan worden opgegeven.
+ * Lege waarden worden gefilterd en de uitkomst is altijd een array van strings.
+ */
+function normalize_ndw_ids($value) {
+    $ids = [];
+
+    if (is_array($value)) {
+        $ids = $value;
+    } elseif ($value !== null) {
+        $ids = [$value];
+    }
+
+    $ids = array_map(function ($val) {
+        return trim((string)$val);
+    }, $ids);
+
+    $ids = array_filter($ids, function ($val) {
+        return $val !== '';
+    });
+
+    return array_values(array_unique($ids));
+}
+
 // ---------- Inlezen bruggen.json ----------
 if (!file_exists($jsonInputFile)) {
     die("Input bestand niet gevonden: $jsonInputFile\n");
@@ -80,6 +104,9 @@ foreach ($bruggen_raw as $index => $item) {
         file_put_contents($logBadFile, $logLine, FILE_APPEND);
         continue; // skip deze brug
     }
+
+    // Ondersteun zowel string als array voor ndwID's
+    $item['ndwIDs'] = normalize_ndw_ids($item['ndwID'] ?? []);
 
     // Alles OK: voeg toe aan genormaliseerde lijst
     $bruggen[] = $item;
@@ -262,6 +289,7 @@ foreach ($bruggen as $brug) {
             'Naam' => $brug['naam'],
             'Provincie' => $brug['provincie'],
             'Stad' => $brug['stad'],
+            'ndwIDs' => $brug['ndwIDs'],
             'status' => $status,
             'open' => ($status === "open") ? true : false
         ]
