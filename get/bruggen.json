@@ -2274,7 +2274,7 @@
     "naam": "Duinkerkenbrug",
     "stad": "Groningen",
     "provincie": "Groningen",
-    "ndwID": "n"
+    "ndwID": "NLGRQ000130331900034"
   },
   {
     "id": "590",
@@ -2334,7 +2334,7 @@
     "id": "596",
     "latitude": "53.31929",
     "longitude": "6.939303",
-    "naam": "Zeesluis Delfzijl",
+    "naam": "Zeesluis Delfzijl Zuid",
     "stad": "Farmsum",
     "provincie": "Groningen",
     "ndwID": "NLFAR000600353600007"
@@ -2661,7 +2661,7 @@
     "naam": "Schroebrug",
     "stad": "Middelburg",
     "provincie": "Zeeland",
-    "ndwID": "n"
+    "ndwID": "NLMID001340492900081"
   },
   {
     "id": "636",
@@ -3408,6 +3408,24 @@
     "naam": "Hoge brug over de Grote Sluis Vianen",
     "stad": "Vianen",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLRBG002054318300055"
+    "ndwID": "NLVAN001040549500008"
+  },
+  {
+    "id": "1206",
+    "latitude": 51.9928422147669,
+    "longitude": 5.09753747607115,
+    "naam": "Julianabrug Vianen",
+    "stad": "Vianen",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLVAN001040549700011"
+  },
+  {
+    "id": "596",
+    "latitude": "53.320588556801",
+    "longitude": "6.9405135512352",
+    "naam": "Zeesluis Delfzijl Noord",
+    "stad": "Farmsum",
+    "provincie": "Groningen",
+    "ndwID": "NLFAR000600353900005"
   }
 ]
