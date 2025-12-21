@@ -663,7 +663,7 @@
     "naam": "Harinxmabrug",
     "stad": "Leeuwarden",
     "provincie": "Friesland",
-    "ndwID": "NLLWR000220361100277"
+    "ndwID": {"NLLWR000220361100277","NLLWR000220361100276"]
   },
   {
     "id": "207",
@@ -1365,7 +1365,7 @@
     "naam": "Beukerssluis",
     "stad": "Wanneperveen",
     "provincie": "Overijssel",
-    "ndwID": "n"
+    "ndwID": "NLZWS000890315000001"
   },
   {
     "id": "294",
@@ -3369,10 +3369,12 @@
     "id": "1202",
     "latitude": 51.8310920504257,
     "longitude": 4.96783770560788,
-    "naam": "Grote Merwedesluis",
+    "naam": "Hoge brug over Grote Merwedesluis",
     "stad": "Gorinchem",
     "provincie": "Zuid-Holland",
-    "ndwID": "NLGOR001040552400232"
+    "ndwID": [
+      "NLGOR001040552400232"
+    ]
   },
   {
     "id": "1203",
@@ -3381,11 +3383,11 @@
     "naam": "Zwaanskuikenbrug",
     "stad": "Lexmond",
     "provincie": "Utrecht",
-    "ndwID": "NLZWS000890315000001"
+    "ndwID": "NLLXM001040550200071"
   },
   {
     "id": "1204",
-    "naam": "Zwaanskuikenbrug",
+    "naam": "Alphensebrug",
     "stad": "Alphen aan den Rijn",
     "provincie": "Zuid-Holland",
     "latitude": 52.1288147897445,
@@ -3427,5 +3429,26 @@
     "stad": "Farmsum",
     "provincie": "Groningen",
     "ndwID": "NLFAR000600353900005"
+  },
+  {
+    "id": "1207",
+    "latitude": 51.9688978442195,
+    "longitude": 5.07242786632221,
+    "naam": "Bolgerijensebrug",
+    "stad": "Vianen",
+    "provincie": "Zuid-Holland",
+    "ndwID": "NLVAN001040549900044"
+  },
+  ,
+  {
+    "id": "1208",
+    "latitude": 51.8310920504257,
+        "longitude": 4.96783770560788,
+    "naam": "Korte brug over Grote Merwedesluis",
+    "stad": "Gorinchem",
+    "provincie": "Zuid-Holland",
+    "ndwID": [
+      "NLGOR001040552200231"
+    ]
   }
 ]
