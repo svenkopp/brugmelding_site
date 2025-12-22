@@ -779,17 +779,16 @@
 
       const diffMs = Date.now() - date.getTime();
       const diffSec = Math.max(0, Math.floor(diffMs / 1000));
-      if (diffSec < 60) return `${diffSec}s geleden`;
 
-      const diffMin = Math.floor(diffSec / 60);
-      if (diffMin < 60) return `${diffMin}m geleden`;
+      const days = Math.floor(diffSec / 86400);
+      const hours = Math.floor((diffSec % 86400) / 3600);
+      const minutes = Math.floor((diffSec % 3600) / 60);
+      const seconds = diffSec % 60;
 
-      const diffHours = Math.floor(diffMin / 60);
-      const remainingMin = diffMin % 60;
-      if (diffHours < 24) return `${diffHours}u ${remainingMin}m geleden`;
-
-      const diffDays = Math.floor(diffHours / 24);
-      return `${diffDays}d geleden`;
+      if (days > 0) {
+        return `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)} geleden`;
+      }
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)} geleden`;
     }
 
     function setLastUpdateTime(date) {
@@ -907,7 +906,7 @@
     /* AUTO REFRESH */
     load();
     setInterval(load, 30000);
-    setInterval(updateTopStatus, 30000);
+    setInterval(updateTopStatus, 1000);
 
     /* SERVICE WORKER */
     if ("serviceWorker" in navigator) {
