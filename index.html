@@ -305,11 +305,6 @@
       font-weight: 600;
       margin-bottom: 6px;
     }
-    .history-summary {
-      font-size: 12px;
-      opacity: 0.8;
-      margin-bottom: 6px;
-    }
     .history-list {
       list-style: none;
       padding: 0;
@@ -672,7 +667,6 @@
 
         <div class="history-section">
           <div class="history-title">Geschiedenis (laatste 24 uur)</div>
-          <div class="history-summary" id="historySummary">Totaal open: …</div>
           <ul class="history-list" id="historyList">
             <li class="history-item">Laden…</li>
           </ul>
@@ -822,7 +816,6 @@
 
     function renderHistory(bridgeId) {
       const list = document.getElementById("historyList");
-      const summary = document.getElementById("historySummary");
       if (!list) return;
 
       fetch(`/get/history.php?id=${encodeURIComponent(bridgeId)}&limit=100&hours=24`)
@@ -834,11 +827,8 @@
 
           if (openEvents.length === 0) {
             list.innerHTML = '<li class="history-item">Geen gebeurtenissen in de laatste 24 uur.</li>';
-            if (summary) summary.textContent = "Totaal open: 00:00:00";
             return;
           }
-
-          let totalSeconds = 0;
 
           list.innerHTML = openEvents.map(item => {
             const openedAt = item.opened_at ? new Date(item.opened_at) : null;
@@ -857,20 +847,11 @@
               ? formatDuration(durationSeconds)
               : "-";
 
-            if (typeof durationSeconds === "number") {
-              totalSeconds += durationSeconds;
-            }
-
             return `<li class="history-item">${dateStr} - ${openTime} - ${closeTime} - ${duration}</li>`;
           }).join("");
-
-          if (summary) {
-            summary.textContent = `Totaal open: ${formatDuration(totalSeconds)}`;
-          }
         })
         .catch(() => {
           list.innerHTML = '<li class="history-item">Kon geschiedenis niet laden.</li>';
-          if (summary) summary.textContent = "Totaal open: onbekend";
         });
     }
 
