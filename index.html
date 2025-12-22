@@ -60,6 +60,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
       background: rgba(255,255,255,0.9);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(0,0,0,0.1);
@@ -70,6 +72,12 @@
       border-color: rgba(255,255,255,0.2);
     }
 
+    .top-branding {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
     .top-title {
       font-size: 16px;
       font-weight: 600;
@@ -77,6 +85,19 @@
     .top-subtitle {
       font-size: 11px;
       opacity: 0.7;
+    }
+    .top-status {
+      font-size: 12px;
+      opacity: 0.8;
+      flex: 1;
+      min-width: 180px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    body.dark .top-status {
+      color: #ddd;
     }
 
     .theme-toggle {
@@ -291,6 +312,10 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 2px;
+      -webkit-overflow-scrolling: touch;
     }
     .history-item {
       padding: 8px 10px;
@@ -346,10 +371,12 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <div>
+    <div class="top-branding">
       <div class="top-title">Brugmelding</div>
       <div class="top-subtitle">NDW – brugopeningen NL</div>
     </div>
+
+    <div class="top-status" id="updateStatus" aria-live="polite">Laatste update: laden…</div>
 
     <button class="theme-toggle" id="themeToggle">
       <span class="icon">🌙</span>
@@ -489,16 +516,29 @@
     const deepLinkSlug = getDeepLinkSlug();
     let deepLinkHandled = false;
 
-    function load() {
-      fetch("/get/bruggen_open.json")
-        .then(r => r.json())
-        .then(data => {
-          bruggen = data;
-          updateProvinceOptions();
-          renderMarkers();
-          applyDeepLinkIfNeeded();
-          updateSheet();
-        });
+    const updateStatusEl = document.getElementById("updateStatus");
+    let lastUpdateTime = null;
+
+    async function load() {
+      try {
+        const response = await fetch("/get/bruggen_open.json");
+        const lastModifiedHeader = response.headers.get("last-modified");
+        const lastModified = parseDateSafe(lastModifiedHeader);
+
+        const data = await response.json();
+        bruggen = data;
+
+        const latestFromData = getLatestUpdateFromData(data);
+        const chosenDate = lastModified || latestFromData || new Date();
+        setLastUpdateTime(chosenDate);
+
+        updateProvinceOptions();
+        renderMarkers();
+        applyDeepLinkIfNeeded();
+        updateSheet();
+      } catch (error) {
+        updateTopStatus("Kon brugdata niet laden");
+      }
     }
 
     function renderMarkers() {
@@ -710,6 +750,70 @@
       return `${pad(h)}:${pad(m)}:${pad(sec)}`;
     }
 
+    function parseDateSafe(value) {
+      if (!value) return null;
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function getLatestUpdateFromData(items) {
+      if (!Array.isArray(items)) return null;
+
+      return items.reduce((latest, item) => {
+        const dt = parseDateSafe(item?.Data?.GetDatumStart);
+        if (dt && (!latest || dt > latest)) {
+          return dt;
+        }
+        return latest;
+      }, null);
+    }
+
+    function formatRelativeTimeFromNow(date) {
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+
+      const diffMs = Date.now() - date.getTime();
+      const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+
+      const days = Math.floor(diffSec / 86400);
+      const hours = Math.floor((diffSec % 86400) / 3600);
+      const minutes = Math.floor((diffSec % 3600) / 60);
+      const seconds = diffSec % 60;
+
+      if (days > 0) {
+        return `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)} geleden`;
+      }
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)} geleden`;
+    }
+
+    function setLastUpdateTime(date) {
+      if (date instanceof Date && !Number.isNaN(date.getTime())) {
+        lastUpdateTime = date;
+      }
+      updateTopStatus();
+    }
+
+    function updateTopStatus(messageOverride = null) {
+      if (!updateStatusEl) return;
+
+      if (messageOverride) {
+        updateStatusEl.textContent = messageOverride;
+        updateStatusEl.removeAttribute("title");
+        return;
+      }
+
+      if (!lastUpdateTime) {
+        updateStatusEl.textContent = "Laatste update: laden…";
+        updateStatusEl.removeAttribute("title");
+        return;
+      }
+
+      const relative = formatRelativeTimeFromNow(lastUpdateTime);
+      updateStatusEl.textContent = relative
+        ? `Laatste update: ${relative}`
+        : "Laatste update: onbekend";
+      updateStatusEl.title = `Bijgewerkt: ${dateTimeFormatter.format(lastUpdateTime)}`;
+    }
+
     function renderHistory(bridgeId) {
       const list = document.getElementById("historyList");
       if (!list) return;
@@ -783,6 +887,7 @@
     /* AUTO REFRESH */
     load();
     setInterval(load, 30000);
+    setInterval(updateTopStatus, 1000);
 
     /* SERVICE WORKER */
     if ("serviceWorker" in navigator) {
