@@ -70,6 +70,31 @@
       border-color: rgba(255,255,255,0.2);
     }
 
+    .top-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .top-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: contain;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    body.dark .top-logo {
+      background: #111;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    }
+
     .top-title {
       font-size: 16px;
       font-weight: 600;
@@ -346,9 +371,12 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <div>
-      <div class="top-title">Brugmelding</div>
-      <div class="top-subtitle">NDW – brugopeningen NL</div>
+    <div class="top-brand">
+      <img class="top-logo" src="/icons/AppIcons.svg" alt="Brugmelding logo" />
+      <div class="top-text">
+        <div class="top-title">Brugmelding</div>
+        <div class="top-subtitle">NDW – brugopeningen NL</div>
+      </div>
     </div>
 
     <button class="theme-toggle" id="themeToggle">
