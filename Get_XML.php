@@ -44,6 +44,70 @@ function normalize_ndw_ids($value) {
     return array_values(array_unique($ids));
 }
 
+function parse_iso_datetime($value) {
+    if (!is_string($value) || trim($value) === '') {
+        return null;
+    }
+
+    try {
+        return new DateTime($value);
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+function derive_bridge_status(array $candidate, DateTime $now) {
+    $start       = $candidate['start'];
+    $end         = $candidate['end'];
+    $validity    = $candidate['validityStatus'];
+    $probability = $candidate['probability'];
+    $operator    = $candidate['operatorStatus'];
+
+    $status      = 'dicht';
+    $isOpen      = false;
+    $isPlanned   = false;
+    $statusMomentRaw = $candidate['startRaw'] ?: '';
+
+    $windowActive = $start && $start <= $now && (!$end || $end >= $now);
+
+    if ($windowActive && ($validity === 'active' || $probability === 'certain' || $operator === 'beingCarriedOut')) {
+        $status = 'open';
+        $isOpen = true;
+    } elseif ($start && $start > $now) {
+        $status = 'gepland';
+        $isPlanned = true;
+    } elseif ($validity === 'planned' || $probability === 'probable' || $operator === 'approved') {
+        $status = 'gepland';
+        $isPlanned = true;
+    } else {
+        $statusMomentRaw = $candidate['endRaw'] ?: $statusMomentRaw;
+    }
+
+    $distance = $start ? abs($now->getTimestamp() - $start->getTimestamp()) : PHP_INT_MAX;
+    if ($isOpen && $start && $start <= $now && (!$end || $end >= $now)) {
+        $distance = 0;
+    }
+
+    return [
+        'status' => $status,
+        'open' => $isOpen,
+        'planning' => $isPlanned,
+        'statusMomentRaw' => $statusMomentRaw ?: $now->format('Y-m-d\TH:i:s.v\Z'),
+        'distance' => $distance
+    ];
+}
+
+function status_priority($status) {
+    switch ($status) {
+        case 'open':
+            return 3;
+        case 'gepland':
+            return 2;
+        default:
+            return 1;
+    }
+}
+
 // ---------- Inlezen bruggen.json ----------
 if (!file_exists($jsonInputFile)) {
     die("Input bestand niet gevonden: $jsonInputFile\n");
@@ -179,6 +243,10 @@ foreach ($arraySituation as $situation) {
     $latRaw = safe_get_string($loc->latitude);
     $lonRaw = safe_get_string($loc->longitude);
     $startRaw = safe_get_string($validityNode->overallStartTime);
+    $endRaw = safe_get_string($validityNode->overallEndTime);
+    $validityStatus = safe_get_string($situation->situationRecord->validity->validityStatus);
+    $probability = safe_get_string($situation->situationRecord->probabilityOfOccurrence);
+    $operatorStatus = safe_get_string($situation->situationRecord->operatorActionStatus);
 
     if ($latRaw === '' || $lonRaw === '' || $startRaw === '') continue;
 
@@ -188,18 +256,25 @@ foreach ($arraySituation as $situation) {
     $lon = round((float)$lonRaw, 5);
     $key = $lat . '_' . $lon;
 
-    // Parse start time veilig
-    try {
-        $startDt = new DateTime($startRaw);
-    } catch (Exception $e) {
-        continue;
-    }
+    $startDt = parse_iso_datetime($startRaw);
+    if (!$startDt) continue;
+
+    $endDt = parse_iso_datetime($endRaw);
 
     $toekomst = (clone $startDt)->modify("+2 hours");
     if ($toekomst > $now) {
         // bewaar situatie
         if (!isset($situationMap[$key])) $situationMap[$key] = [];
-        $situationMap[$key][] = $situation;
+        $situationMap[$key][] = [
+            'node' => $situation,
+            'start' => $startDt,
+            'end' => $endDt,
+            'startRaw' => $startRaw,
+            'endRaw' => $endRaw,
+            'validityStatus' => $validityStatus,
+            'probability' => $probability,
+            'operatorStatus' => $operatorStatus
+        ];
     }
 }
 
@@ -213,37 +288,32 @@ foreach ($bruggen as $brug) {
     $key = $lat . '_' . $lon;
 
     $found = null;
+    $GetDatumEinde = '';
+    $planning = false;
+    $openFlag = false;
+    $statusMomentRaw = '';
 
     if (isset($situationMap[$key])) {
         // kies situatie waarvan overallStartTime het dichtst bij nu ligt
-        foreach ($situationMap[$key] as $situation) {
+        foreach ($situationMap[$key] as $candidate) {
+            $candidate['derived'] = derive_bridge_status($candidate, $now);
 
-            $startRaw = safe_get_string($situation->situationRecord->validity->validityTimeSpecification->overallStartTime);
-            if ($startRaw === '') continue;
-
-            try {
-                $dt = new DateTime($startRaw);
-            } catch (Exception $e) {
+            if ($found === null) {
+                $found = $candidate;
                 continue;
             }
 
-            if ($found === null) {
-                $found = $situation;
-                $foundTs = $dt->getTimestamp();
-            } else {
-                $foundStartRaw = safe_get_string($found->situationRecord->validity->validityTimeSpecification->overallStartTime);
-                try {
-                    $foundDt = new DateTime($foundStartRaw);
-                } catch (Exception $e) {
-                    // behoud huidige found als fallback
-                    continue;
-                }
+            $currentPriority = status_priority($found['derived']['status']);
+            $candidatePriority = status_priority($candidate['derived']['status']);
 
-                $diff1 = abs($now->getTimestamp() - $dt->getTimestamp());
-                $diff2 = abs($now->getTimestamp() - $foundDt->getTimestamp());
+            if ($candidatePriority > $currentPriority) {
+                $found = $candidate;
+                continue;
+            }
 
-                if ($diff1 < $diff2) {
-                    $found = $situation;
+            if ($candidatePriority === $currentPriority) {
+                if ($candidate['derived']['distance'] < $found['derived']['distance']) {
+                    $found = $candidate;
                 }
             }
         }
@@ -251,29 +321,31 @@ foreach ($bruggen as $brug) {
 
     // Vul het output-object (zelfde velden als jouw oude script, maar robuust)
     if ($found) {
-        $SituationCurrent   = (string)($found->situationRecord->operatorActionStatus ?? '');
-        $SituationVoorspeld = (string)($found->situationRecord->probabilityOfOccurrence ?? '');
+        $SituationCurrent   = (string)($found['node']->situationRecord->operatorActionStatus ?? '');
+        $SituationVoorspeld = (string)($found['node']->situationRecord->probabilityOfOccurrence ?? '');
         // attributes() kan ontbrekend zijn of korter zijn; bescherm tegen notices
-        $attributes = $found->situationRecord->attributes();
+        $attributes = $found['node']->situationRecord->attributes();
         $ndwVersion = isset($attributes[1]) ? (string)$attributes[1] : "0";
-        $GetDatumStart = (string)($found->situationRecord->validity->validityTimeSpecification->overallStartTime ?? '');
-
-        if ($SituationVoorspeld === "certain") {
-            $status = "open";
-        } elseif ($SituationVoorspeld === "probable") {
-            $status = "voorspeld";
-        } else {
-            $status = "dicht";
-        }
+        $GetDatumStart = $found['startRaw'] ?? (string)($found['node']->situationRecord->validity->validityTimeSpecification->overallStartTime ?? '');
+        $derived = $found['derived'];
+        $status = $derived['status'];
+        $planning = $derived['planning'];
+        $openFlag = $derived['open'];
+        $statusMomentRaw = $derived['statusMomentRaw'];
     } else {
         $SituationCurrent   = "certain";
         $SituationVoorspeld = "beingTerminated";
         $ndwVersion         = "0";
         $status             = "dicht";
         $GetDatumStart      = (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
+        $planning           = false;
+        $openFlag           = false;
+        $statusMomentRaw    = $GetDatumStart;
     }
 
-    $statusMoment = $GetDatumStart ?: (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
+    $GetDatumEinde = $found['endRaw'] ?? $GetDatumEinde;
+
+    $statusMoment = $statusMomentRaw ?: $GetDatumStart ?: (new DateTime())->format('Y-m-d\TH:i:s.v\Z');
     log_status($pdo, $brug['id'], $status, $statusMoment, $historyTable);
 
     // Bouw output voor deze brug
@@ -286,12 +358,16 @@ foreach ($bruggen as $brug) {
             'SituationVoorspeld' => $SituationVoorspeld,
             'ndwVersion' => $ndwVersion,
             'GetDatumStart' => $GetDatumStart,
+            'GetDatumEinde' => $GetDatumEinde,
+            'validityStatus' => $found['validityStatus'] ?? '',
+            'operatorActionStatus' => $found['operatorStatus'] ?? '',
+            'planning' => $planning,
             'Naam' => $brug['naam'],
             'Provincie' => $brug['provincie'],
             'Stad' => $brug['stad'],
             'ndwIDs' => $brug['ndwIDs'],
             'status' => $status,
-            'open' => ($status === "open") ? true : false
+            'open' => $openFlag
         ]
     ];
 }
