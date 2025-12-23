@@ -225,6 +225,9 @@
     .legend-dot.open {
       background: var(--red);
     }
+    .legend-dot.planned {
+      background: #c27c0e;
+    }
 
     /* DETAILSHEET */
     .sheet {
@@ -297,7 +300,7 @@
       border-radius: 999px;
       font-size: 12px;
     }
-	
+		
     .badge-status.closed {
       background: rgba(46,204,113,0.18);
       color: var(--green);
@@ -305,6 +308,10 @@
     .badge-status.open {
       background: rgba(231,76,60,0.18);
       color: var(--red);
+    }
+    .badge-status.planned {
+      background: rgba(241,196,15,0.2);
+      color: #c27c0e;
     }
 
     .badge-dot {
@@ -435,6 +442,7 @@
   <div class="map-panel legend-panel">
     <div class="legend-line"><span class="legend-dot open"></span> Open</div>
     <div class="legend-line"><span class="legend-dot closed"></span> Dicht</div>
+    <div class="legend-line"><span class="legend-dot planned"></span> Gepland</div>
   </div>
 
   <!-- DETAILSHEET -->
@@ -503,8 +511,9 @@
     const cluster = L.markerClusterGroup();
     map.addLayer(cluster);
 
-    const iconOpen = L.icon({ iconUrl:"brug_open.png", iconSize:[28,28] });
-    const iconClosed = L.icon({ iconUrl:"brug_dicht.png", iconSize:[28,28] });
+    const iconOpen = L.icon({ iconUrl:"icons/brug_open.png", iconSize:[28,28] });
+    const iconClosed = L.icon({ iconUrl:"icons/brug_dicht.png", iconSize:[28,28] });
+    const iconPlanned = L.icon({ iconUrl:"icons/brug_voorspeld.png", iconSize:[28,28] });
 
     /* THEME TOGGLE */
     const themeToggle = document.getElementById("themeToggle");
@@ -569,16 +578,20 @@
         const d = b.Data;
         if (!d) return;
 
+        const statusCode = (d.status || (d.open ? "open" : "dicht")).toLowerCase();
+        const isOpen = statusCode === "open" || !!d.open;
+        const isPlanned = statusCode === "gepland" || !!d.planning;
+
         // Status filter
-        if (statusFilter === "open" && !d.open) return;
-        if (statusFilter === "closed" && d.open) return;
+        if (statusFilter === "open" && !isOpen) return;
+        if (statusFilter === "closed" && isOpen) return;
 
         // Provincie filter
         const prov = (d.provincie || "").toLowerCase();
         if (provinceFilter !== "all" && prov !== provinceFilter) return;
 
         const marker = L.marker([d.latitude, d.longitude], {
-          icon: d.open ? iconOpen : iconClosed
+          icon: isOpen ? iconOpen : isPlanned ? iconPlanned : iconClosed
         });
 
         marker.on("click", () => {
@@ -664,26 +677,46 @@
 
     function showDetails(b) {
       const d = b.Data;
-      const isOpen = !!d.open; // als open true is → brugstatus "Open"
-      const statusText = isOpen ? "Open" : "Dicht";
-      const badgeClass = isOpen ? "open" : "closed";
+      const statusCode = (d.status || (d.open ? "open" : "dicht")).toLowerCase();
+      const isOpen = statusCode === "open" || !!d.open; // als open true is → brugstatus "Open"
+      const isPlanned = statusCode === "gepland" || !!d.planning;
+      const statusText = isOpen ? "Open" : isPlanned ? "Gepland" : "Dicht";
+      const badgeClass = isOpen ? "open" : isPlanned ? "planned" : "closed";
 
       sheetTitle.textContent = d.Naam;
       sheetStatus.hidden = false;
       sheetStatus.className = `badge-status ${badgeClass}`;
       sheetStatusText.textContent = statusText;
 
-      const tijd = d.GetDatumStart
-        ? new Date(d.GetDatumStart).toLocaleString("nl-NL")
-        : "-";
+      const startDate = parseDateSafe(d.GetDatumStart);
+      const endDate = parseDateSafe(d.GetDatumEinde);
+      const expectedStartText = formatDateTimeLocal(startDate);
+      const expectedEndText = formatDateTimeLocal(endDate);
 
-      sheetSubtitle.textContent = `Laatste update: ${tijd}`;
+      if (isPlanned) {
+        const endText = expectedEndText ? ` (einde: ${expectedEndText})` : "";
+        sheetSubtitle.textContent = `Verwachte opening: ${expectedStartText || "onbekend"}${endText}`;
+      } else {
+        sheetSubtitle.textContent = `Laatste update: ${expectedStartText || "-"}`;
+      }
+
+      const planningSection = isPlanned
+        ? `
+        <div>
+          <div class="section-label">Verwachting</div>
+          <div>Opening verwacht: ${expectedStartText || "Onbekend"}</div>
+          ${expectedEndText ? `<div>Einde verwacht: ${expectedEndText}</div>` : ""}
+        </div>
+        `
+        : "";
 
       sheetBody.innerHTML = `
         <div>
           <div class="section-label">Locatie</div>
           <div>Lat: ${d.latitude.toFixed(5)}, Lon: ${d.longitude.toFixed(5)}</div>
         </div>
+
+        ${planningSection}
 
         <div class="history-section">
           <div class="history-title">Geschiedenis (laatste 24 uur)</div>
@@ -772,8 +805,17 @@
 
     function parseDateSafe(value) {
       if (!value) return null;
+      if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+      }
       const parsed = new Date(value);
       return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatDateTimeLocal(value) {
+      const dt = parseDateSafe(value);
+      if (!dt) return null;
+      return dateTimeFormatter.format(dt);
     }
 
     function getLatestUpdateFromData(items) {
@@ -916,3 +958,5 @@
   </script>
 </body>
 </html>
+
+

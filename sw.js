@@ -1,4 +1,4 @@
-const CACHE = "brugmelding-v1";
+const CACHE = "brugmelding-v2";
 
 self.addEventListener("install", (evt) => {
   evt.waitUntil(
@@ -7,8 +7,9 @@ self.addEventListener("install", (evt) => {
         "/",
         "/index.html",
         "/manifest.webmanifest",
-        "/brug_open.png",
-        "/brug_dicht.png",
+        "/icons/brug_open.png",
+        "/icons/brug_dicht.png",
+        "/icons/brug_voorspeld.png",
         "/favicon.ico"
       ]);
     })
