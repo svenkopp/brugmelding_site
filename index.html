@@ -289,16 +289,16 @@
       border-color: #444;
     }
 
-    .badge-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-    }
+    .badge-status {␊
+      display: inline-flex;␊
+      align-items: center;␊
+      gap: 6px;␊
+      padding: 4px 10px;␊
+      border-radius: 999px;␊
+      font-size: 12px;␊
+    }␊
 		
-    .badge-status.closed {
+    .badge-status.closed {␊
       background: rgba(46,204,113,0.18);
       color: var(--green);
     }
@@ -439,6 +439,7 @@
   <div class="map-panel legend-panel">
     <div class="legend-line"><span class="legend-dot open"></span> Open</div>
     <div class="legend-line"><span class="legend-dot closed"></span> Dicht</div>
+    <div class="legend-line"><span class="legend-dot planned"></span> Gepland</div>
   </div>
 
   <!-- DETAILSHEET -->
@@ -507,8 +508,9 @@
     const cluster = L.markerClusterGroup();
     map.addLayer(cluster);
 
-    const iconOpen = L.icon({ iconUrl:"brug_open.png", iconSize:[28,28] });
-    const iconClosed = L.icon({ iconUrl:"brug_dicht.png", iconSize:[28,28] });
+    const iconOpen = L.icon({ iconUrl:"icons/brug_open.png", iconSize:[28,28] });
+    const iconClosed = L.icon({ iconUrl:"icons/brug_dicht.png", iconSize:[28,28] });
+    const iconPlanned = L.icon({ iconUrl:"icons/brug_voorspeld.png", iconSize:[28,28] });
 
     /* THEME TOGGLE */
     const themeToggle = document.getElementById("themeToggle");
@@ -573,25 +575,21 @@
         const d = b.Data;
         if (!d) return;
 
+        const statusCode = (d.status || (d.open ? "open" : "dicht")).toLowerCase();
+        const isOpen = statusCode === "open" || !!d.open;
+        const isPlanned = statusCode === "gepland" || !!d.planning;
+
         // Status filter
-        if (statusFilter === "open" && !d.open) return;
-        if (statusFilter === "closed" && d.open) return;
+        if (statusFilter === "open" && !isOpen) return;
+        if (statusFilter === "closed" && isOpen) return;
 
         // Provincie filter
         const prov = (d.provincie || "").toLowerCase();
         if (provinceFilter !== "all" && prov !== provinceFilter) return;
 
         const marker = L.marker([d.latitude, d.longitude], {
-          icon: d.open ? iconOpen : iconClosed
+          icon: isOpen ? iconOpen : isPlanned ? iconPlanned : iconClosed
         });
-
-        marker.on("click", () => {
-          focusOnBridge(b, marker.getLatLng());
-        });
-
-        cluster.addLayer(marker);
-        markers.push({ marker, item: b });
-      });
     }
 
     /* PROVINCIE FILTER */
@@ -949,3 +947,4 @@
   </script>
 </body>
 </html>
+
