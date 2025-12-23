@@ -225,6 +225,9 @@
     .legend-dot.open {
       background: var(--red);
     }
+    .legend-dot.planned {
+      background: #c27c0e;
+    }
 
     /* DETAILSHEET */
     .sheet {
@@ -289,16 +292,16 @@
       border-color: #444;
     }
 
-    .badge-status {␊
-      display: inline-flex;␊
-      align-items: center;␊
-      gap: 6px;␊
-      padding: 4px 10px;␊
-      border-radius: 999px;␊
-      font-size: 12px;␊
-    }␊
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
 		
-    .badge-status.closed {␊
+    .badge-status.closed {
       background: rgba(46,204,113,0.18);
       color: var(--green);
     }
@@ -590,6 +593,14 @@
         const marker = L.marker([d.latitude, d.longitude], {
           icon: isOpen ? iconOpen : isPlanned ? iconPlanned : iconClosed
         });
+
+        marker.on("click", () => {
+          focusOnBridge(b, marker.getLatLng());
+        });
+
+        cluster.addLayer(marker);
+        markers.push({ marker, item: b });
+      });
     }
 
     /* PROVINCIE FILTER */
@@ -947,4 +958,5 @@
   </script>
 </body>
 </html>
+
 
