@@ -11,7 +11,7 @@ date_default_timezone_set("UTC");
 $jsonInputFile  = __DIR__ . '/get/bruggen.json';
 $jsonOutputFile = __DIR__ . '/get/bruggen_open.json';
 $logBadFile     = __DIR__ . '/get/foute_bruggen.log';
-$ndwUrl         = "http://opendata.ndw.nu/brugopeningen.xml.gz";
+$ndwUrl         = "http://opendata.ndw.nu/planningsfeed_brugopeningen.xml.gz";
 
 $dbConfig = load_db_config();
 
@@ -42,6 +42,42 @@ function normalize_ndw_ids($value) {
     });
 
     return array_values(array_unique($ids));
+}
+
+/**
+ * Haal eerste child node op op basis van local-name(), namespace-onafhankelijk.
+ */
+function first_child_local(SimpleXMLElement $node, $name) {
+    $result = $node->xpath("./*[local-name()='{$name}']");
+    return (is_array($result) && isset($result[0])) ? $result[0] : null;
+}
+
+/**
+ * Volg een pad met local-name() en geef de stringwaarde terug.
+ */
+function get_path_value(SimpleXMLElement $node, array $path) {
+    $current = $node;
+    foreach ($path as $segment) {
+        $current = first_child_local($current, $segment);
+        if (!$current) {
+            return '';
+        }
+    }
+    return safe_get_string($current);
+}
+
+/**
+ * Volg een pad met local-name() en geef de node terug.
+ */
+function get_path_node(SimpleXMLElement $node, array $path) {
+    $current = $node;
+    foreach ($path as $segment) {
+        $current = first_child_local($current, $segment);
+        if (!$current) {
+            return null;
+        }
+    }
+    return $current;
 }
 
 // ---------- Inlezen bruggen.json ----------
@@ -150,17 +186,12 @@ if ($rcXML === false) {
     die("Fout bij parsen NDW XML.\n");
 }
 
-// Navigeer naar situations (defensie tegen ontbrekende nodes)
-$envelope = $rcXML->children('http://schemas.xmlsoap.org/soap/envelope/');
-$body     = $envelope->Body ?? null;
-$datex    = $body ? $body->children('http://datex2.eu/schema/2/2_0') : null;
-
-if (!$datex || !isset($datex->d2LogicalModel->payloadPublication->situation)) {
+// Vind situations namespace-onafhankelijk, zodat zowel DATEX II v2.3 als v3 werkt.
+$arraySituation = $rcXML->xpath("//*[local-name()='payloadPublication' or local-name()='payload']/*[local-name()='situation']");
+if (!is_array($arraySituation) || count($arraySituation) === 0) {
     file_put_contents($logBadFile, date('c') . " - NDW XML heeft geen situation nodes\n", FILE_APPEND);
     // We gaan door met lege situaties
     $arraySituation = [];
-} else {
-    $arraySituation = $datex->d2LogicalModel->payloadPublication->situation;
 }
 
 // ---------- Indexeer situaties op afgeronde coördinaten (lat_ lon) ----------
@@ -171,14 +202,17 @@ $now = new DateTime();
 foreach ($arraySituation as $situation) {
 
     // Beveiliging: check of nodes bestaan
-    $loc = $situation->situationRecord->groupOfLocations->locationForDisplay ?? null;
-    $validityNode = $situation->situationRecord->validity->validityTimeSpecification ?? null;
+    $record = first_child_local($situation, 'situationRecord');
+    if (!$record) continue;
+
+    $loc = get_path_node($record, ['groupOfLocations', 'locationForDisplay']);
+    $validityNode = get_path_node($record, ['validity', 'validityTimeSpecification']);
 
     if (!$loc || !$validityNode) continue;
 
-    $latRaw = safe_get_string($loc->latitude);
-    $lonRaw = safe_get_string($loc->longitude);
-    $startRaw = safe_get_string($validityNode->overallStartTime);
+    $latRaw = get_path_value($loc, ['latitude']);
+    $lonRaw = get_path_value($loc, ['longitude']);
+    $startRaw = get_path_value($validityNode, ['overallStartTime']);
 
     if ($latRaw === '' || $lonRaw === '' || $startRaw === '') continue;
 
@@ -218,7 +252,10 @@ foreach ($bruggen as $brug) {
         // kies situatie waarvan overallStartTime het dichtst bij nu ligt
         foreach ($situationMap[$key] as $situation) {
 
-            $startRaw = safe_get_string($situation->situationRecord->validity->validityTimeSpecification->overallStartTime);
+            $record = first_child_local($situation, 'situationRecord');
+            if (!$record) continue;
+
+            $startRaw = get_path_value($record, ['validity', 'validityTimeSpecification', 'overallStartTime']);
             if ($startRaw === '') continue;
 
             try {
@@ -231,7 +268,10 @@ foreach ($bruggen as $brug) {
                 $found = $situation;
                 $foundTs = $dt->getTimestamp();
             } else {
-                $foundStartRaw = safe_get_string($found->situationRecord->validity->validityTimeSpecification->overallStartTime);
+                $foundRecord = first_child_local($found, 'situationRecord');
+                if (!$foundRecord) continue;
+
+                $foundStartRaw = get_path_value($foundRecord, ['validity', 'validityTimeSpecification', 'overallStartTime']);
                 try {
                     $foundDt = new DateTime($foundStartRaw);
                 } catch (Exception $e) {
@@ -251,12 +291,14 @@ foreach ($bruggen as $brug) {
 
     // Vul het output-object (zelfde velden als jouw oude script, maar robuust)
     if ($found) {
-        $SituationCurrent   = (string)($found->situationRecord->operatorActionStatus ?? '');
-        $SituationVoorspeld = (string)($found->situationRecord->probabilityOfOccurrence ?? '');
+        $record = first_child_local($found, 'situationRecord');
+
+        $SituationCurrent   = $record ? get_path_value($record, ['operatorActionStatus']) : '';
+        $SituationVoorspeld = $record ? get_path_value($record, ['probabilityOfOccurrence']) : '';
         // attributes() kan ontbrekend zijn of korter zijn; bescherm tegen notices
-        $attributes = $found->situationRecord->attributes();
-        $ndwVersion = isset($attributes[1]) ? (string)$attributes[1] : "0";
-        $GetDatumStart = (string)($found->situationRecord->validity->validityTimeSpecification->overallStartTime ?? '');
+        $attributes = $record ? $record->attributes() : null;
+        $ndwVersion = ($attributes && isset($attributes['version'])) ? (string)$attributes['version'] : "0";
+        $GetDatumStart = $record ? get_path_value($record, ['validity', 'validityTimeSpecification', 'overallStartTime']) : '';
 
         if ($SituationVoorspeld === "certain") {
             $status = "open";
