@@ -93,6 +93,43 @@ function first_non_empty_path_value(SimpleXMLElement $node, array $paths) {
     return '';
 }
 
+/**
+ * Bepaal brugstatus op basis van DATEX velden.
+ */
+function determine_bridge_status($probability, $actionStatus, $networkType, $startRaw, $endRaw, DateTime $now) {
+    $probability = strtolower(trim((string)$probability));
+    $actionStatus = strtolower(trim((string)$actionStatus));
+    $networkType = strtolower(trim((string)$networkType));
+
+    $isBridgeOperation = ($networkType === 'bridgeswinginoperation');
+    $isApproved = ($actionStatus === 'approved');
+
+    $startDt = null;
+    $endDt = null;
+    try {
+        if ($startRaw !== '') $startDt = new DateTime($startRaw);
+    } catch (Exception $e) {}
+    try {
+        if ($endRaw !== '') $endDt = new DateTime($endRaw);
+    } catch (Exception $e) {}
+
+    // Brug is open als het een brugbediening is, status approved,
+    // en we binnen het geldige tijdvenster zitten.
+    if ($isBridgeOperation && $isApproved && $startDt) {
+        $afterStart = ($now >= $startDt);
+        $beforeEnd = ($endDt === null) ? true : ($now <= $endDt);
+        if ($afterStart && $beforeEnd) {
+            return 'open';
+        }
+    }
+
+    if (in_array($probability, ['certain', 'probable', 'riskof'], true)) {
+        return 'voorspeld';
+    }
+
+    return 'dicht';
+}
+
 // ---------- Inlezen bruggen.json ----------
 if (!file_exists($jsonInputFile)) {
     die("Input bestand niet gevonden: $jsonInputFile\n");
@@ -318,14 +355,17 @@ foreach ($bruggen as $brug) {
         $attributes = $record ? $record->attributes() : null;
         $ndwVersion = ($attributes && isset($attributes['version'])) ? (string)$attributes['version'] : "0";
         $GetDatumStart = $record ? get_path_value($record, ['validity', 'validityTimeSpecification', 'overallStartTime']) : '';
+        $GetDatumEnd = $record ? get_path_value($record, ['validity', 'validityTimeSpecification', 'overallEndTime']) : '';
+        $GeneralNetworkManagementType = $record ? get_path_value($record, ['generalNetworkManagementType']) : '';
 
-        if ($SituationVoorspeld === "certain") {
-            $status = "open";
-        } elseif (in_array($SituationVoorspeld, ["probable", "riskOf"], true)) {
-            $status = "voorspeld";
-        } else {
-            $status = "dicht";
-        }
+        $status = determine_bridge_status(
+            $SituationVoorspeld,
+            $SituationCurrent,
+            $GeneralNetworkManagementType,
+            $GetDatumStart,
+            $GetDatumEnd,
+            $now
+        );
     } else {
         $SituationCurrent   = "certain";
         $SituationVoorspeld = "beingTerminated";
